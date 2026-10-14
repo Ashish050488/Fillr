@@ -1,0 +1,59 @@
+/* ───────────── Tracker ───────────── */
+.item.job {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+}
+.job-main {
+  display: grid;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.job-main:hover h4 {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.stages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 4px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+.stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.stage.on {
+  color: var(--ink);
+}
+.stage svg {
+  width: 14px;
+  height: 14px;
+}
+.stage i {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 50%;
+}
+.stage small {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+button.chip {
+  cursor: pointer;
+  font-weight: 600;
+}
+button.chip.on {
+  background: var(--ink);
+  color: var(--paper);
+}

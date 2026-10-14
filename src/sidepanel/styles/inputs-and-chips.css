@@ -1,0 +1,128 @@
+/* ───────────── Inputs ───────────── */
+.field {
+  display: grid;
+  gap: 5px;
+}
+.field > span {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.field > span em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+.input,
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 9px 2px 7px;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  border-bottom: 1.5px solid var(--rule);
+  border-radius: 0;
+  transition: border-color 140ms ease;
+}
+.input:focus,
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-bottom-color: var(--ink);
+}
+.field textarea,
+textarea.input {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.boxed {
+  padding: 12px 14px !important;
+  border: 1.5px solid var(--rule) !important;
+  border-radius: var(--r1) !important;
+  background-color: var(--paper) !important;
+}
+.boxed:focus {
+  border-color: var(--ink) !important;
+}
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 12px) 55%,
+    calc(100% - 7px) 55% !important;
+  background-size: 5px 5px !important;
+  background-repeat: no-repeat !important;
+  padding-right: 22px !important;
+}
+.select-sm {
+  width: auto;
+  padding: 6px 28px 6px 12px;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r2);
+  background-color: var(--paper);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.select-sm:hover {
+  border-color: var(--ink);
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+}
+
+/* ───────────── Chips, badges ───────────── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: var(--text-sm);
+  border: 1.2px solid var(--ink);
+  border-radius: var(--r3);
+  background: var(--paper);
+}
+.chip.ghost {
+  border-style: dashed;
+  color: var(--ink-2);
+}
+.chip button {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink-3);
+  line-height: 1;
+  font-size: var(--text-md);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border: 1.2px solid currentColor;
+  border-radius: var(--r2);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.badge.solid {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}

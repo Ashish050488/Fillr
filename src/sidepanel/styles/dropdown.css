@@ -1,0 +1,156 @@
+/* ───────────── Dropdown: hand-drawn trigger and list, replacing the browser's own popup ───────────── */
+.dropdown {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.dropdown.compact {
+  width: auto;
+}
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 2px 7px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  border: 0;
+  border-bottom: 1.5px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 140ms ease;
+}
+.dropdown-trigger > span {
+  min-width: 0;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+.dropdown-trigger:hover,
+.dropdown-trigger:focus-visible,
+.dropdown.open .dropdown-trigger {
+  outline: none;
+  border-bottom-color: var(--ink);
+}
+.dropdown.compact .dropdown-trigger {
+  padding: 6px 12px;
+  font-size: var(--text-sm);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r2);
+  background: var(--paper);
+}
+.dropdown.compact .dropdown-trigger:hover,
+.dropdown.compact .dropdown-trigger:focus-visible,
+.dropdown.compact.open .dropdown-trigger {
+  border-color: var(--ink);
+}
+.dropdown-placeholder {
+  color: var(--ink-3);
+  opacity: 0.7;
+}
+.dropdown-chevron {
+  flex: none;
+  width: 11px;
+  height: 8px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transition: transform 160ms ease;
+}
+.dropdown.open .dropdown-chevron {
+  transform: rotate(180deg);
+}
+.dropdown-popover {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  padding: 6px;
+  background: var(--paper) var(--grain);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r1);
+  box-shadow: 3px 4px 0 var(--wash);
+  animation: dropdown-in 140ms ease-out;
+}
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scaleY(0.97);
+  }
+}
+.dropdown-search {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-md);
+  border: 0;
+  border-bottom: 1.5px dashed var(--rule);
+}
+.dropdown-search:focus {
+  outline: none;
+  border-bottom-color: var(--ink);
+}
+.dropdown-list {
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+.dropdown-option {
+  position: relative;
+  padding: 7px 10px 7px 24px;
+  font-size: var(--text-md);
+  border-radius: var(--r2);
+  cursor: pointer;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+.dropdown-option.highlighted {
+  background: var(--wash);
+}
+.dropdown-option[aria-selected='true'] {
+  font-weight: 600;
+}
+.dropdown-option[aria-selected='true']::before {
+  content: '✓';
+  position: absolute;
+  left: 8px;
+  font-family: var(--hand);
+  font-size: var(--text-lg);
+  line-height: 1.1;
+}
+.dropdown-empty {
+  padding: 8px 10px;
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-popover {
+    animation: none;
+  }
+}
+/* Date of birth spans the full row so Day, Month and Year each have room. */
+.pfield-full {
+  grid-column: 1 / -1;
+}
+.date-input {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.7fr) minmax(110px, 1.4fr) minmax(76px, 1fr);
+  gap: 14px;
+}
+.date-input .dropdown-trigger > span {
+  white-space: nowrap;
+}

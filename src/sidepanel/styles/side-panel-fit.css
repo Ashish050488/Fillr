@@ -1,0 +1,115 @@
+/* ───────────── Fit the side panel: no sideways scrolling ─────────────
+   Chrome's side panel is often 320-400px wide. Smaller type, one column, and long words
+   (URLs, emails, company names) wrap instead of pushing the page wider. */
+body {
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+.shell,
+.main,
+.top,
+.stack,
+.stack-sm,
+.sheet,
+.item,
+.row,
+.field,
+.grid2 > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.main {
+  padding: 14px 12px 110px;
+}
+.top {
+  padding: 12px 12px 8px;
+}
+.dock {
+  padding: 10px 12px 14px;
+}
+.brand b {
+  font-size: 24px;
+}
+.tab {
+  font-size: var(--text-sm);
+  padding: 6px 2px;
+}
+.job-head h1 {
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+.section-title {
+  font-size: 19px;
+}
+.verdict {
+  font-size: 21px;
+}
+.sheet {
+  padding: 12px;
+}
+.btn {
+  font-size: var(--text-sm);
+  padding: 7px 12px;
+  min-height: 34px;
+}
+.btn.big {
+  font-size: var(--text-md);
+  min-height: 42px;
+}
+.input,
+.field input,
+.field textarea,
+.field select {
+  font-size: var(--text-md);
+}
+.letter {
+  font-size: var(--text-sm);
+  line-height: 22px;
+  background-size: auto;
+  padding: 10px 12px 10px 14px;
+}
+.fit {
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+}
+.ring {
+  width: 76px;
+  height: 76px;
+}
+.ring .num {
+  font-size: 27px;
+}
+.stat b {
+  font-size: 24px;
+}
+.stat-row {
+  gap: 6px;
+}
+.stat {
+  padding: 8px 6px;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+li,
+span,
+b,
+a,
+code,
+summary {
+  overflow-wrap: anywhere;
+}
+.chip {
+  max-width: 100%;
+}
+@media (max-width: 460px) {
+  .grid2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.wide body,
+.wide {
+  font-size: var(--text-md);
+}

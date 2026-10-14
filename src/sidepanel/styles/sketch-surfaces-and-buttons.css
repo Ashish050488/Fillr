@@ -1,0 +1,127 @@
+/* ───────────── Sketch surfaces ───────────── */
+.sheet {
+  position: relative;
+  padding: 16px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r1);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.sheet.alt {
+  border-radius: var(--r2);
+}
+.sheet.flat {
+  box-shadow: none;
+  border-color: var(--rule);
+}
+.sheet.dashed {
+  border-style: dashed;
+  box-shadow: none;
+}
+.sheet.ink {
+  background: var(--ink);
+  color: var(--paper);
+  --logo-paper: var(--ink);
+}
+.sheet.ink .muted {
+  color: color-mix(in srgb, var(--paper) 65%, transparent);
+}
+.rule {
+  height: 0;
+  border: 0;
+  border-top: 1.5px dashed var(--rule);
+  margin: 4px 0;
+}
+
+/* ───────────── Buttons ───────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--text-md);
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r2);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease;
+}
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn.big {
+  min-height: 46px;
+  font-size: var(--text-lg);
+  padding: 10px 20px;
+  border-radius: var(--r3);
+}
+.btn.block {
+  width: 100%;
+}
+.btn.quiet {
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
+  color: var(--ink-2);
+  min-height: 32px;
+  padding: 6px 10px;
+}
+.btn.quiet:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  background: var(--wash);
+  color: var(--ink);
+}
+.btn.icon {
+  min-height: 32px;
+  width: 32px;
+  padding: 0;
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+/* Inline icons inside text and links stay text-sized. */
+a > svg,
+p > svg {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  flex: none;
+}
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+.link:hover {
+  color: var(--ink);
+}

@@ -1,0 +1,40 @@
+import type { MessageAction } from '../types';
+
+/** Every action name a JobFill message may carry. */
+export const MESSAGE_ACTIONS: readonly MessageAction[] = [
+  'GET_STATUS',
+  'PING',
+  'RELOAD_EXTENSION',
+  'RECORD_FORM_FILL',
+  'MARK_JOB_APPLIED',
+  'FILL_FORM',
+  'DETECT_FORM',
+  'GET_FILL_PROFILE',
+  'AI_TEST_KEY',
+  'AI_KEY_INFO',
+  'AI_SAVE_KEY',
+  'AI_REMOVE_KEY',
+  'AI_LOAD_MODELS',
+  'AI_TASK',
+  'CONTENT_MESSAGE',
+  'SCAN_PAGE',
+  'FILL_PROGRESS',
+  'JOB_GET',
+  'JOB_PREPARE',
+  'JOB_COVER_LETTER',
+  'JOB_UPDATE',
+  'JOB_DELETE',
+  'OPEN_PANEL',
+  'JOB_REPAIR',
+  'AI_USAGE',
+  'FRAMES_SCAN',
+  'FILL_FRAMES',
+  'ANSWERS_LOOKUP',
+  'ANSWER_REMEMBER',
+  'ANSWERS_LIST',
+  'ANSWER_FORGET',
+];
+
+export function isMessageAction(candidate: unknown): candidate is MessageAction {
+  return typeof candidate === 'string' && (MESSAGE_ACTIONS as readonly string[]).includes(candidate);
+}

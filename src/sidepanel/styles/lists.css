@@ -1,0 +1,60 @@
+/* ───────────── Lists ───────────── */
+.list {
+  display: grid;
+}
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 2px;
+  border-bottom: 1.5px dashed var(--rule);
+}
+.item:last-child {
+  border-bottom: 0;
+}
+.item h4 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+.item .meta {
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+.mini-ring {
+  width: 38px;
+  height: 38px;
+  position: relative;
+  display: grid;
+  place-content: center;
+  font-family: var(--hand);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+.mini-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.stat {
+  padding: 10px 12px;
+  text-align: center;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r3);
+}
+.stat b {
+  display: block;
+  font-family: var(--hand);
+  font-size: 30px;
+  line-height: 1;
+}
+.stat span {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}

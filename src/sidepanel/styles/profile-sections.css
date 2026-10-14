@@ -1,0 +1,111 @@
+/* ───────────── Folding sections: skills and what was read from your resume ───────────── */
+.collapsible-section > summary {
+  cursor: pointer;
+  list-style: none;
+  gap: 12px;
+}
+.collapsible-section > summary::-webkit-details-marker {
+  display: none;
+}
+.collapsible-section > summary {
+  flex-wrap: nowrap;
+}
+.collapsible-section > summary .section-title {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.collapsible-section > summary > .small {
+  flex: none;
+}
+.collapsible-section > summary .section-title small {
+  display: block;
+  margin: 2px 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.collapsible-section[open] > summary {
+  margin-bottom: 10px;
+}
+.collapsible-section .resume-entry {
+  padding: 10px 14px;
+}
+.resume-entry-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.resume-entry-description,
+.resume-entry-description p {
+  margin: 4px 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--ink-3);
+  white-space: pre-line;
+}
+.resume-entry-description summary {
+  cursor: pointer;
+  list-style: none;
+}
+.resume-entry-description summary::-webkit-details-marker {
+  display: none;
+}
+.resume-entry-description summary {
+  margin-top: 4px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+.resume-entry-description summary {
+  text-decoration: underline wavy;
+  text-underline-offset: 3px;
+}
+.resume-entry-description summary::after {
+  content: '';
+  color: var(--ink);
+  text-decoration: underline wavy;
+  text-underline-offset: 3px;
+}
+.resume-entry-description[open] summary {
+  display: none;
+}
+.resume-points {
+  display: grid;
+  gap: 5px;
+  margin: 6px 0 0;
+  padding-left: 16px;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.resume-points li::marker {
+  content: '– ';
+  color: var(--ink);
+}
+.resume-entry-description .resume-points {
+  margin-top: 5px;
+}
+
+/* ───────────── Tracker row: status on one line ───────────── */
+.status-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.status-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* ───────────── Summary and other long text: grow with the text, no scrollbar, no resize grip ───────────── */
+textarea.boxed,
+.field textarea {
+  field-sizing: content;
+  min-height: 72px;
+  max-height: none;
+  overflow: hidden;
+  resize: none;
+}
