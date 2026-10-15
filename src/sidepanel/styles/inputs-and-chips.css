@@ -39,7 +39,7 @@
 .field textarea,
 textarea.input {
   min-height: 96px;
-  resize: vertical;
+  resize: none;
   line-height: 1.6;
 }
 .boxed {

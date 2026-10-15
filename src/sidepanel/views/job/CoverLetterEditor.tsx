@@ -80,7 +80,13 @@ export default function CoverLetterEditor({ job, onToast }: { job: Job; onToast:
             options={LENGTH_OPTIONS}
             onChange={(length) => setStyle({ ...style, length: length as AnswerStyle['length'] })}
           />
-          <button className="btn" type="button" disabled={isWriting} onClick={() => void handleRewrite()}>
+          <button
+            className="btn"
+            type="button"
+            disabled={isWriting}
+            aria-busy={isWriting}
+            onClick={() => void handleRewrite()}
+          >
             {isWriting ? <Spinner /> : <Icon name="redo" />} {letterDraft ? 'Rewrite' : 'Write'}
           </button>
         </div>

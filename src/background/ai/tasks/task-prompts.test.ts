@@ -33,6 +33,17 @@ describe('answer_questions task', () => {
     expect(taskPrompt('answer_questions', context)).not.toContain('FOUNDER NOTE');
   });
 
+  it('writes a referral request for LinkedIn that reads their current company, not a past one', () => {
+    const prompt = taskPrompt('answer_questions', { ...context, audience: 'linkedin-referral' });
+    expect(prompt).toContain('MESSAGE TO A PERSON ON LINKEDIN');
+    expect(prompt).toContain('CURRENT role and company');
+    expect(prompt).toContain('Startup founder or CEO: do not ask for a referral');
+    expect(prompt).toContain('Recruiter or talent partner');
+    expect(prompt).toContain('Japan: formal, humble and very brief');
+    expect(prompt).toContain('FOLLOW-UP');
+    expect(prompt).not.toContain('FOUNDER NOTE');
+  });
+
   it('keeps only asked, non-empty answers and exact choice options', () => {
     const result = validateTaskResult('answer_questions', context, {
       answers: { q0: 'Dear Globex team,', q1: 'Twitter', q2: 'Engineer', q9: 'unasked', q3: '' },

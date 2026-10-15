@@ -1,6 +1,8 @@
 import type { AnswerQuestionsContext, CoverLetterContext } from '../../../shared/types';
 import { SOURCE_RULES, toJson } from './extraction-prompts';
 import { FOUNDER_NOTE_RULES } from './founder-note-rules';
+import { LINKEDIN_COACH_RULES } from './linkedin-coach-rules';
+import { REFERRAL_MESSAGE_RULES } from './referral-message-rules';
 
 export type JobMatchContext = AnswerQuestionsContext & { minScore: number };
 
@@ -29,7 +31,13 @@ function buildWritingRules(writingContext: WritingContext): string[] {
     '- No buzzwords or filler such as passionate, leverage, synergy, dynamic, cutting-edge, delve, thrilled, excited to apply, I am writing to express, tapestry, testament.',
     '- No markdown, bullet points, headings, emojis or placeholders like [Company].',
     `- Tone: ${style.tone ?? 'professional'} but warm.${style.extraNote ? ` The candidate also wants to mention: ${toJson(style.extraNote)}.` : ''}`,
-    ...(writingContext.audience === 'yc-founder' ? FOUNDER_NOTE_RULES : COVER_LETTER_RULES(style.length ?? 'medium')),
+    ...(writingContext.audience === 'yc-founder'
+      ? FOUNDER_NOTE_RULES
+      : writingContext.audience === 'linkedin-referral'
+        ? REFERRAL_MESSAGE_RULES
+        : writingContext.audience === 'linkedin-coach'
+          ? LINKEDIN_COACH_RULES
+          : COVER_LETTER_RULES(style.length ?? 'medium')),
     'QUESTION KINDS',
     '- "long": a cover letter or founder note (follow the rules above) or an open question: 60-150 words unless it asks otherwise.',
     '- "short": just the value or one short sentence. Respect maxLength.',

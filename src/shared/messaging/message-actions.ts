@@ -33,6 +33,11 @@ export const MESSAGE_ACTIONS: readonly MessageAction[] = [
   'ANSWER_REMEMBER',
   'ANSWERS_LIST',
   'ANSWER_FORGET',
+  'REFERRAL_DRAFT',
+  'REFERRAL_MARK_ASKED',
+  'REFERRAL_UPDATE',
+  'REFERRAL_DELETE',
+  'LINKEDIN_COACH',
 ];
 
 export function isMessageAction(candidate: unknown): candidate is MessageAction {

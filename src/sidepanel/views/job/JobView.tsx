@@ -12,6 +12,8 @@ import { fillTab, isFillable, scanTab } from '../../services/active-tab-bridge';
 import CoverLetterEditor from './CoverLetterEditor';
 import FillActionDock from './FillActionDock';
 import FitAnalysis from './FitAnalysis';
+import LinkedInHome from '../linkedin/LinkedInHome';
+import { isLinkedInNetworkingPage } from '../../../shared/jobs/linkedin-profile-id';
 
 const WEAK_FIT_BELOW_SCORE = 55;
 const MINIMUM_POSTING_TEXT_LENGTH = 200;
@@ -89,6 +91,8 @@ export default function JobView({
     );
   };
 
+  // On LinkedIn you ask for referrals; job fit and autofill stay for job postings.
+  if (currentTab && isLinkedInNetworkingPage(currentTab.url)) return <LinkedInHome onToast={onToast} />;
   if (!currentTab || !isFillable(currentTab.url)) {
     return (
       <div className="empty fade-in">
@@ -156,12 +160,15 @@ export default function JobView({
           </button>
         </p>
       )}
-      <FillActionDock
-        isWeakFit={Boolean(fit && fit.score < WEAK_FIT_BELOW_SCORE)}
-        isBusy={isBusy}
-        isFilling={busyAction === 'fill'}
-        onFill={(isForced) => void handleFill(isForced)}
-      />
+      {/* No autofill on LinkedIn: you only check fit and ask for referrals there. */}
+      {hostnameOf(currentTab.url) !== 'linkedin.com' && (
+        <FillActionDock
+          isWeakFit={Boolean(fit && fit.score < WEAK_FIT_BELOW_SCORE)}
+          isBusy={isBusy}
+          isFilling={busyAction === 'fill'}
+          onFill={(isForced) => void handleFill(isForced)}
+        />
+      )}
     </div>
   );
 }

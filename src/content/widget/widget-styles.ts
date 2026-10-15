@@ -1,6 +1,8 @@
 /** The in-page widget's look: black ink on white, hand-drawn edges (inside its own shadow root). */
 export const WIDGET_STYLES = `
 :host { all: initial; }
+/* all: initial also resets display, which would make the hidden attribute do nothing. */
+:host([hidden]) { display: none !important; }
 * { box-sizing: border-box; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
 .wrap { --paper: #ffffff; --ink: #000000; --muted: #222222; --logo-paper: var(--paper);
   position: fixed; right: 20px; bottom: 20px; z-index: 2147483647; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
@@ -43,5 +45,19 @@ details { margin-top: 8px; color: var(--muted); font-size: 12px; } summary { cur
 .ask-input { flex: 1; min-width: 0; padding: 5px 2px; font-size: 12.5px; color: var(--ink); background: transparent; border: 0; border-bottom: 1.5px solid var(--ink); }
 .ask-input:focus { outline: none; border-bottom-width: 2px; }
 button:focus-visible { outline: 2px dashed var(--ink); outline-offset: 3px; }
+button { cursor: pointer; } button:disabled { cursor: progress; }
+.fab button:active:not(:disabled) { background: rgba(0,0,0,.12); }
+.fab button:active:not(:disabled) .logo, .fab button:active:not(:disabled) .chev { transform: scale(.9); }
+.logo, .chev { transition: transform .12s ease; }
+.fab:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.fab { transition: transform .14s ease, box-shadow .14s ease; }
+.fab button:disabled .logo { animation: breathe 1.1s ease-in-out infinite; }
+.fab.done { animation: pop .38s cubic-bezier(.3,1.6,.5,1); }
+@keyframes breathe { 50% { opacity: .45; } }
+@keyframes pop { 40% { transform: scale(1.06); } }
+.ask-option { transition: background .12s ease, color .12s ease, transform .12s ease; }
+.ask-option:active { transform: scale(.95); }
+.x { border-radius: 50%; transition: background .12s ease, transform .12s ease; } .x:hover { background: rgba(0,0,0,.07); } .x:active { transform: scale(.9); }
+.link { transition: opacity .12s ease; } .link:hover { opacity: .7; }
 [hidden] { display: none !important; }
-@media (prefers-reduced-motion: reduce) { .card, .spin { animation: none; } .fab, .btn { transition: none; } }`;
+@media (prefers-reduced-motion: reduce) { .card, .spin, .fab.done, .fab button:disabled .logo { animation: none; } .fab, .btn, .ask-option, .x, .logo, .chev { transition: none; } .fab:hover { transform: none; } }`;

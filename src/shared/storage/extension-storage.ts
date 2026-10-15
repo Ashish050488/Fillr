@@ -13,6 +13,7 @@ export const STORAGE_KEYS = {
   AI_CONFIG: 'jobfill_ai_config',
   APPLICATION_HISTORY: 'jobfill_application_history',
   DATA_VERSION: 'jobfill_data_version',
+  REFERRALS: 'jobfill_referrals_v1',
 } as const;
 type Stored = Record<string, unknown>;
 function storage(): chrome.storage.StorageArea {

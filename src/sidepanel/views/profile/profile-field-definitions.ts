@@ -42,6 +42,12 @@ export const PROFILE_FIELD_GROUPS: Array<[string, ProfileFieldDefinition[]]> = [
       { key: 'linkedin', label: 'LinkedIn', type: 'url', placeholder: 'linkedin.com/in/…' },
       { key: 'github', label: 'GitHub', type: 'url', placeholder: 'github.com/…' },
       { key: 'portfolio', label: 'Website', type: 'url', placeholder: 'Portfolio or personal site' },
+      {
+        key: 'resumeLink',
+        label: 'Resume link',
+        type: 'url',
+        placeholder: 'Google Drive link, set to “Anyone with the link”',
+      },
     ],
   ],
   [

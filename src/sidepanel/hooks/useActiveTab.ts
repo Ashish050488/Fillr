@@ -20,7 +20,8 @@ export function useActiveTab(onTabChange: () => void) {
     refreshTab();
     const handleTabActivated = () => refreshTab();
     const handleTabUpdated = (_tabId: number, changeInfo: chrome.tabs.TabChangeInfo, changedTab: chrome.tabs.Tab) => {
-      if (changedTab.active && changeInfo.status === 'complete') refreshTab();
+      // LinkedIn and other single-page sites change the address without a full load.
+      if (changedTab.active && (changeInfo.status === 'complete' || changeInfo.url)) refreshTab();
     };
     const handleProgress = (message: { action?: string; payload?: { text?: string } }) => {
       if (message?.action === 'FILL_PROGRESS' && message.payload?.text) setProgressText(message.payload.text);

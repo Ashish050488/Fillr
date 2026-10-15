@@ -2,6 +2,15 @@
 import type { AIProvider, AITask, AITaskContext, AITaskResult, AnswerStyle, FormQuestion } from './ai';
 import type { Job, JobStatus, PageScan } from './job';
 import type { Resume } from './profile';
+import type {
+  LinkedInCoach,
+  LinkedInProfileSnapshot,
+  OutreachGoal,
+  Referral,
+  ReferralChannel,
+  ReferralDrafts,
+  ReferralStatus,
+} from './referral';
 
 export interface MessageMap {
   GET_STATUS: { request: undefined; response: { status: 'ready'; version: string } };
@@ -122,6 +131,30 @@ export interface MessageMap {
   };
   ANSWER_FORGET: { request: { key: string }; response: { success: boolean; error?: string } };
   OPEN_PANEL: { request: undefined; response: { success: boolean; error?: string } };
+  REFERRAL_DRAFT: {
+    request: { snapshot: LinkedInProfileSnapshot; jobUrl?: string; goal?: OutreachGoal };
+    response: {
+      success: boolean;
+      drafts?: ReferralDrafts;
+      referral?: Referral;
+      /** Things to know before sending, e.g. you already asked this person. */
+      notices?: string[];
+      error?: string;
+    };
+  };
+  REFERRAL_MARK_ASKED: {
+    request: { profileUrl: string; channel: ReferralChannel; message?: string };
+    response: { success: boolean; referral?: Referral; error?: string };
+  };
+  REFERRAL_UPDATE: {
+    request: { id: string; status: ReferralStatus };
+    response: { success: boolean; error?: string };
+  };
+  REFERRAL_DELETE: { request: { id: string }; response: { success: boolean; error?: string } };
+  LINKEDIN_COACH: {
+    request: { refresh?: boolean } | undefined;
+    response: { success: boolean; coach?: LinkedInCoach; error?: string };
+  };
   CONTENT_MESSAGE: {
     request: { type: string; payload?: unknown };
     response: { success: boolean; data?: unknown; error?: string };

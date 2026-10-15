@@ -107,7 +107,7 @@
   padding: 12px 18px 12px 22px;
   border: 1.5px solid var(--rule);
   border-radius: var(--r1);
-  resize: vertical;
+  resize: none;
   line-height: 24px;
   font-size: var(--text-md);
   background: var(--paper) repeating-linear-gradient(to bottom, transparent 0 23px, var(--wash) 23px 24px);

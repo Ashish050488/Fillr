@@ -1,6 +1,7 @@
 import { defineContentScript } from 'wxt/sandbox';
 import { registerFrameHooks } from '../src/content/fill/page-scan';
 import { watchSubmissions } from '../src/content/tracking/submission-watcher';
+import { mountReferralWidget } from '../src/content/linkedin/mount-referral-widget';
 import { mountWidget } from '../src/content/widget/mount-widget';
 import { sendMessage } from '../src/shared/messaging/extension-messages';
 
@@ -30,6 +31,8 @@ export default defineContentScript({
         return false;
       }
     };
-    mountWidget(context);
+    // On LinkedIn you only ask for referrals: the referral widget replaces Fill now there.
+    if (/(^|\.)linkedin\.com$/i.test(location.hostname)) mountReferralWidget(context);
+    else mountWidget(context);
   },
 });

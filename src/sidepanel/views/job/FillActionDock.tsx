@@ -14,16 +14,34 @@ export default function FillActionDock({ isWeakFit, isBusy, isFilling, onFill }:
     <div className="dock" style={{ margin: '0 -16px', position: 'sticky' }}>
       {isWeakFit ? (
         <div className="stack-sm">
-          <button className="btn primary big block" type="button" disabled={isBusy} onClick={() => onFill(true)}>
+          <button
+            className="btn primary big block"
+            type="button"
+            disabled={isBusy}
+            aria-busy={isBusy}
+            onClick={() => onFill(true)}
+          >
             Fill everything anyway
           </button>
-          <button className="btn block" type="button" disabled={isBusy} onClick={() => onFill(false)}>
+          <button
+            className="btn block"
+            type="button"
+            disabled={isBusy}
+            aria-busy={isBusy}
+            onClick={() => onFill(false)}
+          >
             Only fill my details
           </button>
           <p className="small muted center">Weak fit, but applying still puts your resume in their database.</p>
         </div>
       ) : (
-        <button className="btn primary big block" type="button" disabled={isBusy} onClick={() => onFill(false)}>
+        <button
+          className="btn primary big block"
+          type="button"
+          disabled={isBusy}
+          aria-busy={isBusy}
+          onClick={() => onFill(false)}
+        >
           {isFilling ? (
             <>
               <Spinner /> Filling…

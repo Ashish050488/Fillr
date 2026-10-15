@@ -46,8 +46,8 @@ export interface AnswerQuestionsContext {
   company?: string;
   questions: FormQuestion[];
   style?: AnswerStyle;
-  /** "yc-founder": the application goes straight to a startup founder (Y Combinator). */
-  audience?: 'yc-founder';
+  /** "yc-founder": a note to a startup founder. "linkedin-referral": asking someone for a referral. */
+  audience?: 'yc-founder' | 'linkedin-referral' | 'linkedin-coach';
 }
 export type FitVerdict = 'strong' | 'good' | 'stretch' | 'weak';
 export interface FitAnalysis {

@@ -12,6 +12,13 @@ export async function activeTab(): Promise<ActiveTab | undefined> {
   return { id: tab.id, url: tab.url, title: tab.title ?? '' };
 }
 
+/** Opens a page in the tab you are looking at (e.g. a LinkedIn search), not in a new tab. */
+export async function openInCurrentTab(url: string): Promise<void> {
+  const tab = await activeTab();
+  if (tab) await chrome.tabs.update(tab.id, { url });
+  else await chrome.tabs.create({ url });
+}
+
 export function isFillable(url: string): boolean {
   return /^https?:/i.test(url) && !/^https:\/\/(chrome\.google\.com\/webstore|chromewebstore\.google\.com)/i.test(url);
 }

@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { jobKey } from '../../../shared/jobs/job-key';
 import { sendMessage } from '../../../shared/messaging/extension-messages';
 import { STORAGE_KEYS } from '../../../shared/storage/extension-storage';
-import type { Job, JobStatus } from '../../../shared/types';
+import type { Job, JobStatus, Referral } from '../../../shared/types';
 import DeskDoodle from '../../components/DeskDoodle';
+import StatStrip from '../../components/StatStrip';
 import { useStoredValue } from '../../hooks/useStoredValue';
 import ApplicationRow from './ApplicationRow';
+import ApplicationSheet from './ApplicationSheet';
+import ReferralList from './ReferralList';
 import {
   isAppliedThisWeek,
   matchesFilter,
@@ -21,7 +24,10 @@ export default function TrackerView({ onToast }: { onToast: (message: string) =>
   const jobs = useStoredValue<Job[]>(STORAGE_KEYS.JOBS, []);
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState<TrackerFilter>('All');
-  const [expandedKey, setExpandedKey] = useState<string>();
+  const [openKey, setOpenKey] = useState<string>();
+  const referrals = useStoredValue<Referral[]>(STORAGE_KEYS.REFERRALS, []);
+  const sentReferralCount = referrals.filter((referral) => referral.status !== 'drafted').length;
+  const [isShowingReferrals, setIsShowingReferrals] = useState(false);
 
   // Older entries saved before titles were resolved get fixed from the ATS API (no AI),
   // and duplicate records from older key rules are merged.
@@ -51,46 +57,65 @@ export default function TrackerView({ onToast }: { onToast: (message: string) =>
     onToast(reply.success ? 'Deleted' : (reply.error ?? 'Could not delete.'));
   };
 
+  const sectionCounts = { Applications: submittedJobs.length, Referrals: sentReferralCount };
+  const sectionSwitch = (
+    <div className="segments" role="tablist" aria-label="Tracker section">
+      {(['Applications', 'Referrals'] as const).map((sectionName) => (
+        <button
+          key={sectionName}
+          type="button"
+          role="tab"
+          className="segment"
+          aria-selected={(sectionName === 'Referrals') === isShowingReferrals}
+          onClick={() => setIsShowingReferrals(sectionName === 'Referrals')}
+        >
+          {sectionName} <span className="count">{sectionCounts[sectionName]}</span>
+        </button>
+      ))}
+    </div>
+  );
+  if (isShowingReferrals)
+    return (
+      <div className="stack fade-in">
+        {sectionSwitch}
+        <ReferralList onToast={onToast} />
+      </div>
+    );
+
+  const openJob = visibleJobs.find((job) => (job.key ?? job.id) === openKey);
   return (
     <div className="stack fade-in">
-      <div className="stat-row">
-        <div className="stat">
-          <b>{submittedJobs.filter(isAppliedThisWeek).length}</b>
-          <span>applied this week</span>
-        </div>
-        <div className="stat">
-          <b>{submittedJobs.length}</b>
-          <span>applied total</span>
-        </div>
-        <div className="stat">
-          <b>{interviewCount}</b>
-          <span>interviews</span>
-        </div>
-      </div>
+      {sectionSwitch}
+      <StatStrip
+        stats={[
+          { value: submittedJobs.filter(isAppliedThisWeek).length, label: 'this week' },
+          { value: submittedJobs.length, label: 'applied' },
+          { value: interviewCount, label: 'interviews' },
+        ]}
+      />
       {submittedJobs.length > 0 && (
-        <div className="row between">
-          <div className="chips">
-            {TRACKER_FILTERS.map((filterName) => (
-              <button
-                key={filterName}
-                type="button"
-                className={`chip ${activeFilter === filterName ? 'on' : ''}`}
-                onClick={() => setActiveFilter(filterName)}
-              >
-                {filterName}
-              </button>
-            ))}
-          </div>
-          {submittedJobs.length > SEARCH_SHOWN_ABOVE && (
-            <input
-              className="input"
-              style={{ width: 140 }}
-              placeholder="Search…"
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-            />
-          )}
+        <div className="chips one-line">
+          {TRACKER_FILTERS.map((filterName) => (
+            <button
+              key={filterName}
+              type="button"
+              className={`chip ${activeFilter === filterName ? 'on' : ''}`}
+              onClick={() => setActiveFilter(filterName)}
+            >
+              {filterName}
+              <span className="count">{submittedJobs.filter((job) => matchesFilter(job, filterName)).length}</span>
+            </button>
+          ))}
         </div>
+      )}
+      {submittedJobs.length > SEARCH_SHOWN_ABOVE && (
+        <input
+          className="input"
+          type="search"
+          placeholder="Search title, company or site…"
+          value={searchText}
+          onChange={(event) => setSearchText(event.target.value)}
+        />
       )}
       {!submittedJobs.length && (
         <div className="empty">
@@ -103,21 +128,19 @@ export default function TrackerView({ onToast }: { onToast: (message: string) =>
         </div>
       )}
       <div className="list">
-        {visibleJobs.map((job) => {
-          const rowKey = job.key ?? job.id;
-          return (
-            <ApplicationRow
-              key={rowKey}
-              job={job}
-              isExpanded={expandedKey === rowKey}
-              onToggle={() => setExpandedKey(expandedKey === rowKey ? undefined : rowKey)}
-              onUpdate={(patch) => updateJob(job, patch)}
-              onDelete={() => void handleDelete(job)}
-              onToast={onToast}
-            />
-          );
-        })}
+        {visibleJobs.map((job) => (
+          <ApplicationRow key={job.key ?? job.id} job={job} onOpen={() => setOpenKey(job.key ?? job.id)} />
+        ))}
       </div>
+      {openJob && (
+        <ApplicationSheet
+          job={openJob}
+          onClose={() => setOpenKey(undefined)}
+          onUpdate={(patch) => updateJob(openJob, patch)}
+          onDelete={() => void handleDelete(openJob).then(() => setOpenKey(undefined))}
+          onToast={onToast}
+        />
+      )}
     </div>
   );
 }
