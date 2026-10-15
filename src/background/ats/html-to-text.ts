@@ -15,7 +15,7 @@ const HTML_ENTITIES: Record<string, string> = {
   bull: '*',
 };
 
-function decodeEntities(text: string): string {
+export function decodeEntities(text: string): string {
   return text.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, entityName: string) => {
     if (entityName[0] === '#') {
       const isHex = entityName[1].toLowerCase() === 'x';

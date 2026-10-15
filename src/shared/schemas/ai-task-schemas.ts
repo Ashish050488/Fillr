@@ -48,6 +48,7 @@ const answerQuestionsContextSchema = z
     company: titleText,
     questions: z.array(questionSchema).min(1).max(40),
     style: styleSchema.optional(),
+    audience: z.literal('yc-founder').optional(),
   })
   .strict();
 const jobParsingContextSchema = z

@@ -25,6 +25,14 @@ describe('answer_questions task', () => {
     expect(prompt).toMatch(/Never use em dashes/);
   });
 
+  it('writes a note to the founder for Y Combinator startups instead of a formal letter', () => {
+    const prompt = taskPrompt('answer_questions', { ...context, audience: 'yc-founder' });
+    expect(prompt).toContain('FOUNDER NOTE');
+    expect(prompt).toContain('Your note goes to');
+    expect(prompt).not.toContain('Dear Hiring Team,"');
+    expect(taskPrompt('answer_questions', context)).not.toContain('FOUNDER NOTE');
+  });
+
   it('keeps only asked, non-empty answers and exact choice options', () => {
     const result = validateTaskResult('answer_questions', context, {
       answers: { q0: 'Dear Globex team,', q1: 'Twitter', q2: 'Engineer', q9: 'unasked', q3: '' },

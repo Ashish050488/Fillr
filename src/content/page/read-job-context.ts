@@ -1,3 +1,4 @@
+import { buildYcJobBrief, isYcJobUrl } from '../../shared/jobs/yc-job-brief';
 import { normalizeWhitespace } from './question-label';
 
 interface JobPosting {
@@ -48,6 +49,21 @@ function htmlToPlainText(html: string): string {
 const ATS_FRAME =
   /(greenhouse\.io|lever\.co|ashbyhq\.com|myworkdayjobs\.com|smartrecruiters\.com|recruitee\.com|workable\.com)/i;
 
+/** YC pages carry the company, founders and job as page data: richer than any visible text. */
+function readYcBrief() {
+  if (!isYcJobUrl(location.href)) return undefined;
+  for (const pageDataHolder of Array.from(document.querySelectorAll('[data-page]'))) {
+    try {
+      const pageData = JSON.parse(pageDataHolder.getAttribute('data-page') ?? '') as { props?: unknown };
+      const jobBrief = buildYcJobBrief(pageData.props);
+      if (jobBrief) return jobBrief;
+    } catch {
+      /* Not page data. */
+    }
+  }
+  return undefined;
+}
+
 /** The job posting page as raw text, plus title and company hints. The background cleans it up. */
 export function readJobContext(): {
   pageText: string;
@@ -56,6 +72,14 @@ export function readJobContext(): {
   company?: string;
   atsUrl?: string;
 } {
+  const ycBrief = readYcBrief();
+  if (ycBrief)
+    return {
+      pageText: ycBrief.brief.slice(0, 60000),
+      url: location.href,
+      jobTitle: ycBrief.title,
+      company: ycBrief.company,
+    };
   const posting = readStructuredPosting();
   const hiringOrganization = posting?.hiringOrganization;
   const company =

@@ -46,6 +46,8 @@ export interface AnswerQuestionsContext {
   company?: string;
   questions: FormQuestion[];
   style?: AnswerStyle;
+  /** "yc-founder": the application goes straight to a startup founder (Y Combinator). */
+  audience?: 'yc-founder';
 }
 export type FitVerdict = 'strong' | 'good' | 'stretch' | 'weak';
 export interface FitAnalysis {

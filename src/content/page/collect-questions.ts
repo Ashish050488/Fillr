@@ -1,3 +1,4 @@
+import { isYcJobUrl } from '../../shared/jobs/yc-job-brief';
 import type { FormQuestion } from '../../shared/types';
 import type { Fillable } from '../form/collect-fillable-fields';
 import { hasSelection, isCombobox } from '../form/searchable-dropdown';
@@ -35,7 +36,9 @@ export function collectQuestions(controls: Fillable[]): PendingQuestion[] {
       }
       if (!['text', 'url', 'number', ''].includes(element.type) || !isUnanswered(element)) continue;
     } else if (!isUnanswered(element)) continue;
-    const label = questionLabel(element);
+    // YC's apply box is often an unlabelled textarea: it is the note to the founder.
+    const isYcNote = element instanceof HTMLTextAreaElement && isYcJobUrl(location.href);
+    const label = questionLabel(element) || (isYcNote ? 'Note to the founder' : '');
     if (!label || SENSITIVE.test(label)) continue;
     let kind: FormQuestion['kind'] = 'short';
     let options: string[] | undefined;

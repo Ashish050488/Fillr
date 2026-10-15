@@ -1,3 +1,4 @@
+import { isYcJobUrl } from '../../shared/jobs/yc-job-brief';
 import type { AnswerQuestionsResult, FormQuestion, Job, JobMatchResult, PageScan } from '../../shared/types';
 import { runTask } from '../ai/ai-engine';
 import { loadWriterInput } from './candidate-profile';
@@ -53,7 +54,11 @@ export function prepareJob(options: PrepareOptions): Promise<PreparedJob> {
 
 async function prepareJobOnce({ scan, force, refresh, analyzeOnly, onStage }: PrepareOptions): Promise<PreparedJob> {
   // No profile, no work: fail in milliseconds, before any record, scrape or AI call.
-  const writerInput = await loadWriterInput();
+  const isFounderNote = isYcJobUrl(scan.url);
+  const writerInput = {
+    ...(await loadWriterInput({ includePublicLinks: isFounderNote })),
+    ...(isFounderNote ? { audience: 'yc-founder' as const } : {}),
+  };
   let job = await ensureJobMeta(scan.url, scan);
   if (!job.jobFacts || refresh) onStage?.('Reading the job description…');
   const jobFacts = await loadJobFacts(refresh ? undefined : job, scan);

@@ -1,5 +1,6 @@
 import type { AnswerQuestionsContext, CoverLetterContext } from '../../../shared/types';
 import { SOURCE_RULES, toJson } from './extraction-prompts';
+import { FOUNDER_NOTE_RULES } from './founder-note-rules';
 
 export type JobMatchContext = AnswerQuestionsContext & { minScore: number };
 
@@ -7,8 +8,13 @@ const LETTER_LENGTHS = { short: '60-120 words', medium: '120-220 words', long: '
 
 type WritingContext = Pick<
   AnswerQuestionsContext,
-  'style' | 'jobTitle' | 'company' | 'jobDescription' | 'candidate' | 'resumeText' | 'questions'
+  'style' | 'jobTitle' | 'company' | 'jobDescription' | 'candidate' | 'resumeText' | 'questions' | 'audience'
 >;
+
+const COVER_LETTER_RULES = (length: keyof typeof LETTER_LENGTHS) => [
+  'COVER LETTER',
+  `- ${LETTER_LENGTHS[length]}. Open with "Dear Hiring Team," (or the company's team name). Name the role. Give two or three concrete matches between the candidate's real work and this job. Say briefly and specifically why this company. Close with "Best regards," and the candidate's name on its own line. Separate paragraphs with blank lines.`,
+];
 
 function buildWritingRules(writingContext: WritingContext): string[] {
   const style = writingContext.style ?? {};
@@ -23,10 +29,9 @@ function buildWritingRules(writingContext: WritingContext): string[] {
     '- No buzzwords or filler such as passionate, leverage, synergy, dynamic, cutting-edge, delve, thrilled, excited to apply, I am writing to express, tapestry, testament.',
     '- No markdown, bullet points, headings, emojis or placeholders like [Company].',
     `- Tone: ${style.tone ?? 'professional'} but warm.${style.extraNote ? ` The candidate also wants to mention: ${toJson(style.extraNote)}.` : ''}`,
-    'COVER LETTER',
-    `- ${LETTER_LENGTHS[style.length ?? 'medium']}. Open with "Dear Hiring Team," (or the company's team name). Name the role. Give two or three concrete matches between the candidate's real work and this job. Say briefly and specifically why this company. Close with "Best regards," and the candidate's name on its own line. Separate paragraphs with blank lines.`,
+    ...(writingContext.audience === 'yc-founder' ? FOUNDER_NOTE_RULES : COVER_LETTER_RULES(style.length ?? 'medium')),
     'QUESTION KINDS',
-    '- "long": a cover letter (follow the rules above) or an open question: 60-150 words unless it asks otherwise.',
+    '- "long": a cover letter or founder note (follow the rules above) or an open question: 60-150 words unless it asks otherwise.',
     '- "short": just the value or one short sentence. Respect maxLength.',
     '- "choice": exactly one of the provided options, copied verbatim, supported by the profile; otherwise an empty string.',
     '- Salary, notice period, visa, sponsorship, work authorization, relocation, start date, demographics, disability, veteran status, references: answer only if the profile states it, else an empty string.',

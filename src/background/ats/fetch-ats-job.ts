@@ -12,6 +12,7 @@ import { readRecruitee } from './readers/recruitee-reader';
 import { readSmartRecruiters } from './readers/smart-recruiters-reader';
 import { readWorkable } from './readers/workable-reader';
 import { readWorkday } from './readers/workday-reader';
+import { readYc } from './readers/yc-reader';
 
 export type { AtsJob } from './ats-types';
 export { htmlToText } from './html-to-text';
@@ -29,6 +30,7 @@ const ATS_READERS: AtsReader[] = [
   readSmartRecruiters,
   readRecruitee,
   readWorkable,
+  readYc,
 ];
 
 const ATS_HOSTS: Array<[RegExp, string]> = [
@@ -39,6 +41,7 @@ const ATS_HOSTS: Array<[RegExp, string]> = [
   [/smartrecruiters\.com$/, 'SmartRecruiters'],
   [/recruitee\.com$/, 'Recruitee'],
   [/^apply\.workable\.com$/, 'Workable'],
+  [/(^|\.)(ycombinator|workatastartup)\.com$/, 'Y Combinator'],
 ];
 
 /** Which ATS a URL belongs to, without fetching anything. */

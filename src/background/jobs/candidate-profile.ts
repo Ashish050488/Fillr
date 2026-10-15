@@ -67,7 +67,7 @@ export interface WriterInput {
  * The candidate side of every writing prompt. Refuses an empty profile before any AI call;
  * the raw resume text is only included when parsing left the profile thin.
  */
-export async function loadWriterInput(): Promise<WriterInput> {
+export async function loadWriterInput(options: { includePublicLinks?: boolean } = {}): Promise<WriterInput> {
   const parsedProfiles = z.array(profileSchema).safeParse(await getStorage<unknown>(STORAGE_KEYS.PROFILES, []));
   const profile = parsedProfiles.success ? (parsedProfiles.data[0] as Profile | undefined) : undefined;
   const hasIdentity = Boolean(
@@ -84,8 +84,16 @@ export async function loadWriterInput(): Promise<WriterInput> {
   const resumeText = profile.resume?.plainText?.trim();
   if (!hasStructuredHistory && !resumeText)
     throw new Error('Upload your resume in the JobFill panel so AI can write for you.');
+  const candidate = buildCandidateDigest(profile);
+  // A note to a founder ends with your GitHub or LinkedIn; ATS forms have their own link fields.
+  if (options.includePublicLinks) {
+    for (const linkKey of ['github', 'linkedin']) {
+      const link = profile.fields[linkKey]?.value?.trim();
+      if (link) candidate[linkKey] = link;
+    }
+  }
   return {
-    candidate: buildCandidateDigest(profile),
+    candidate,
     ...(!hasStructuredHistory && resumeText ? { resumeText: resumeText.slice(0, MAXIMUM_RESUME_TEXT_LENGTH) } : {}),
   };
 }
