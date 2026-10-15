@@ -1,4 +1,4 @@
-import { isYcJobUrl } from '../../shared/jobs/yc-job-brief';
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import type { AnswerQuestionsResult, AnswerStyle, FormQuestion, Job } from '../../shared/types';
 import { runTask } from '../ai/ai-engine';
 import { loadWriterInput } from './candidate-profile';
@@ -10,7 +10,7 @@ export async function rewriteCoverLetter(jobKey: string, style?: AnswerStyle): P
   const job = await getJobByKey(jobKey);
   if (!job) throw new Error('Check this job first so JobFill has the posting.');
   const coverLetterQuestion: FormQuestion = { id: 'q0', label: 'Cover letter', kind: 'long' };
-  const isFounderNote = isYcJobUrl(job.url) || job.jobFacts?.ats === 'Y Combinator';
+  const isFounderNote = isFounderNoteSite(job.url);
   const { result } = await runTask('answer_questions', {
     ...(await loadWriterInput({ includePublicLinks: isFounderNote })),
     ...(isFounderNote ? { audience: 'yc-founder' as const } : {}),

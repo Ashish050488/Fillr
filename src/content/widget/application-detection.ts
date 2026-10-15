@@ -1,4 +1,4 @@
-import { isYcJobUrl } from '../../shared/jobs/yc-job-brief';
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 
 const ATS_HOSTS =
   /(greenhouse\.io|lever\.co|myworkdayjobs\.com|workday\.com|ashbyhq\.com|smartrecruiters\.com|icims\.com|jobvite\.com|workable\.com|bamboohr\.com|breezy\.hr|recruitee\.com|teamtailor\.com|personio\.|rippling\.com|successfactors|taleo\.net|oraclecloud\.com|wellfound\.com|naukri\.com|instahyre\.com|cutshort\.io|indeed\.com|linkedin\.com\/jobs|dover\.com|jazzhr\.com|applytojob\.com|ycombinator\.com\/companies|workatastartup\.com)/i;
@@ -12,8 +12,8 @@ export function looksLikeApplication(fillableFieldCount: number): boolean {
   if (hasEmbeddedAts) return true;
   if (fillableFieldCount === 0) return false;
   if (ATS_HOSTS.test(location.href)) return true;
-  // YC's apply box is a single "note to the founder": one textarea is the whole application.
-  if (isYcJobUrl(location.href) && document.querySelector('textarea')) return true;
+  // YC and Wellfound: a single "note to the founder" textarea is the whole application.
+  if (isFounderNoteSite(location.href) && document.querySelector('textarea')) return true;
   const hasUpload = document.querySelector('input[type="file"]') !== null;
   const pageSummary = `${location.href} ${document.title} ${document.querySelector('h1, h2')?.textContent ?? ''}`;
   return fillableFieldCount >= 4 && (hasUpload || APPLY_WORDS.test(pageSummary));

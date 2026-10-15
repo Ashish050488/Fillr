@@ -1,5 +1,5 @@
 import type { Job, JobFacts, PageScan } from '../../shared/types';
-import { isYcJobUrl } from '../../shared/jobs/yc-job-brief';
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import { runTask } from '../ai/ai-engine';
 import { fetchAtsJob, type AtsJob } from '../ats/fetch-ats-job';
 import { getJobByKey, jobKey, updateJob } from './job-store';
@@ -30,10 +30,10 @@ export async function loadJobFacts(
   const atsJob = await fetchAtsJob(scan.url, scan.atsUrl);
   if (atsJob) return toJobFacts(atsJob);
   if (!scan.pageText.trim()) return undefined;
-  // YC pages: founders and company story matter for the note, so keep the page text whole.
-  if (isYcJobUrl(scan.url))
+  // YC and Wellfound: founders, hiring contact and company story matter for the note, so keep the text whole.
+  if (isFounderNoteSite(scan.url))
     return {
-      ats: 'Y Combinator',
+      ats: /wellfound|angel\.co/i.test(scan.url) ? 'Wellfound' : 'Y Combinator',
       title: scan.jobTitle,
       description: scan.pageText.slice(0, MAXIMUM_PAGE_TEXT_FOR_GEMMA),
     };

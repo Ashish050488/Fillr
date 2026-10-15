@@ -1,3 +1,4 @@
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import { buildYcJobBrief, isYcJobUrl } from '../../shared/jobs/yc-job-brief';
 import { normalizeWhitespace } from './question-label';
 
@@ -64,6 +65,15 @@ function readYcBrief() {
   return undefined;
 }
 
+const MAXIMUM_EXTRA_PAGE_TEXT_LENGTH = 6000;
+
+/** The page as you see it, without JobFill's own widget. */
+function readVisiblePageText(): string {
+  const widgetText = (document.getElementById('jobfill-panel-host') as HTMLElement | null)?.innerText ?? '';
+  const pageText = document.body.innerText.trim();
+  return widgetText ? pageText.replace(widgetText, '') : pageText;
+}
+
 /** The job posting page as raw text, plus title and company hints. The background cleans it up. */
 export function readJobContext(): {
   pageText: string;
@@ -105,6 +115,13 @@ export function readJobContext(): {
   }
   // Keep line breaks: they help Gemma separate sections of a noisy page.
   if (pageText.length < 400) pageText = document.body.innerText.trim();
+  // Wellfound and Work at a Startup show the hiring contact, founders and company beside the post.
+  else if (isFounderNoteSite(location.href))
+    pageText = [
+      pageText,
+      'Also on the page (company, founders, hiring contact):',
+      readVisiblePageText().slice(0, MAXIMUM_EXTRA_PAGE_TEXT_LENGTH),
+    ].join('\n\n');
   // A careers page embedding Greenhouse/Lever: the iframe URL identifies the posting for the ATS API.
   const atsUrl = Array.from(document.querySelectorAll('iframe'))
     .map((frame) => frame.src)

@@ -1,3 +1,5 @@
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
+
 /** What a submit button and a "your application went through" page look like across ATSs. */
 const SUBMIT_TEXT = /\b(submit|send|apply|finish|complete)\b/i;
 const NOT_SUBMIT =
@@ -10,7 +12,6 @@ const MINIMUM_APPLICATION_FIELDS = 3;
 const MAXIMUM_BUTTON_LABEL_LENGTH = 60;
 const SCANNED_TEXT_LENGTH = 30000;
 
-const YC_HOST = /(^|\.)(ycombinator|workatastartup)\.com$/i;
 const WORKDAY_HOST = /(myworkdayjobs|myworkdaysite|myworkday)\.com$|\.wd\d+\./i;
 // After Submit, Workday takes you to your candidate home, which lists the application.
 const WORKDAY_SUCCESS_URL = /\/(userHome|candidateHome|home)(\/|$|\?)/i;
@@ -42,9 +43,9 @@ function isWorkdaySubmit(button: HTMLElement, label: string): boolean {
   return /^submit( application)?$/i.test(label) || (isFooterButton && /\bsubmit\b/i.test(label));
 }
 
-/** YC: "Send" or "Apply" next to the note to the founder, which is the whole application. */
-function isYcSend(button: HTMLElement, label: string): boolean {
-  if (!YC_HOST.test(button.ownerDocument.location.hostname)) return false;
+/** YC and Wellfound: "Send" or "Apply" beside the note to the founder, which is the whole application. */
+function isFounderNoteSend(button: HTMLElement, label: string): boolean {
+  if (!isFounderNoteSite(button.ownerDocument.location.href)) return false;
   const container = button.closest('form, [role="dialog"], .modal') ?? button.parentElement?.parentElement;
   return (
     /^(send|apply|send application|submit application|submit)\b/i.test(label) &&
@@ -63,7 +64,7 @@ export function isSubmitAction(target: Element | null): boolean {
   if (!label || label.length > MAXIMUM_BUTTON_LABEL_LENGTH || NOT_SUBMIT.test(label) || !SUBMIT_TEXT.test(label))
     return false;
   if (isWorkdaySubmit(button, label)) return true;
-  if (isYcSend(button, label)) return true;
+  if (isFounderNoteSend(button, label)) return true;
   const form = button.closest('form') ?? button.ownerDocument;
   // Only forms that look like applications: a few fields, or a file upload.
   return (
