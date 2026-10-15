@@ -3,7 +3,7 @@ import { onMessage, sendMessage } from '../../shared/messaging/extension-message
 import { scanPage } from '../fill/page-scan';
 import { collectFillables } from '../form/collect-fillable-fields';
 import { readJobContext } from '../page/read-job-context';
-import { watchSubmissions } from '../tracking/submission-watcher';
+import { isSubmitAction, watchSubmissions } from '../tracking/submission-watcher';
 import { rememberAnswersGivenOnPage } from '../answers/remembered-answers';
 import { looksLikeApplication } from './application-detection';
 import { trackUserActivity } from './step-tracking';
@@ -41,7 +41,10 @@ export function mountWidget(context: ContentScriptContext): void {
   };
   document.addEventListener('pointerdown', handleOutsidePointerDown, true);
   // Answers you picked on the page yourself are remembered as you move to the next step.
+  // YC closes its popup on Send: read the job (title, company) while the popup is still open.
+  let jobContextAtSubmit: ReturnType<typeof readJobContext> | undefined;
   const handleContinuePointerDown = (event: PointerEvent) => {
+    if (isSubmitAction(event.target as Element)) jobContextAtSubmit = readJobContext();
     const button = (event.target as Element | null)?.closest?.('button, [role="button"], input[type="submit"]');
     const buttonText = (button?.textContent || (button as HTMLInputElement | null)?.value || '').trim();
     if (/^(save and continue|continue|next|submit|review|submit application)$/i.test(buttonText))
@@ -126,7 +129,7 @@ export function mountWidget(context: ContentScriptContext): void {
 
   // The tracker updates itself once the site confirms the application went through.
   const stopWatchingSubmissions = watchSubmissions((applicationUrl) => {
-    const jobContext = readJobContext();
+    const jobContext = jobContextAtSubmit ?? readJobContext();
     void sendMessage('MARK_JOB_APPLIED', {
       url: applicationUrl,
       jobTitle: jobContext.jobTitle,

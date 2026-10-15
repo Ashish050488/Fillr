@@ -13,7 +13,10 @@ export interface ChoiceButtonGroup {
 const MINIMUM_CHOICES = 2;
 const MAXIMUM_CHOICES = 6;
 const MAXIMUM_CHOICE_TEXT_LENGTH = 40;
-const NOT_A_CHOICE = /\b(submit|apply|upload|attach|remove|delete|add|next|back|continue|cancel|save|edit|clear)\b/i;
+// Action buttons, never answers: YC's "Close" and "Send" sit side by side like a Yes/No row, and
+// picking one would send your application.
+const NOT_A_CHOICE =
+  /\b(submit|apply|send|close|dismiss|done|finish|confirm|upload|attach|remove|delete|add|next|back|continue|cancel|save|edit|clear|share|sign|log ?in|message)\b/i;
 const SELECTED_CLASS = /(^|[_\s-])(active|selected|checked|chosen|pressed)([_\s-]|$)/i;
 const FIELD_CONTAINER =
   '.ashby-application-form-field-entry, [class*="field-entry"], [class*="question"], fieldset, li';

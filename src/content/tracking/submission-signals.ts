@@ -5,7 +5,7 @@ const SUBMIT_TEXT = /\b(submit|send|apply|finish|complete)\b/i;
 const NOT_SUBMIT =
   /\b(search|subscribe|newsletter|log ?in|sign ?in|sign ?up|filter|next|continue|save for later|back)\b/i;
 const SUCCESS_TEXT =
-  /(thank(s| you) for (applying|your application|your interest|submitting)|application (has been |was |is )?(successfully )?(submitted|received|sent|complete)|we(?:'ve| have) received your application|successfully (applied|submitted)|you(?:'ve| have) (successfully )?applied|your application is (in|on its way)|congratulations[\s\S]{0,80}application)/i;
+  /(thank(s| you) for (applying|your application|your interest|submitting)|application (has been |was |is )?(successfully )?(submitted|received|sent|complete)|we(?:'ve| have) received your application|(?:message|note|application) (?:has been |was )?sent|successfully (applied|submitted)|you(?:'ve| have) (successfully )?applied|your application is (in|on its way)|congratulations[\s\S]{0,80}application)/i;
 const SUCCESS_URL =
   /\/(thanks|thank-you|thankyou|confirmation|confirmed|submitted|success|application-submitted|applied)(\/|$|\?)/i;
 const MINIMUM_APPLICATION_FIELDS = 3;
@@ -43,15 +43,33 @@ function isWorkdaySubmit(button: HTMLElement, label: string): boolean {
   return /^submit( application)?$/i.test(label) || (isFooterButton && /\bsubmit\b/i.test(label));
 }
 
-/** YC and Wellfound: "Send" or "Apply" beside the note to the founder, which is the whole application. */
-function isFounderNoteSend(button: HTMLElement, label: string): boolean {
-  if (!isFounderNoteSite(button.ownerDocument.location.href)) return false;
-  const container = button.closest('form, [role="dialog"], .modal') ?? button.parentElement?.parentElement;
-  return (
-    /^(send|apply|send application|submit application|submit)\b/i.test(label) &&
-    Boolean(container?.querySelector('textarea'))
-  );
+const MAXIMUM_NOTE_SEARCH_DEPTH = 8;
+
+/**
+ * YC and Wellfound: the filled-in note box beside a Send button. Their popups have no form and
+ * not always a dialog role, so walk up from the button until a written note appears.
+ */
+export function findSentNote(button: Element): HTMLTextAreaElement | undefined {
+  if (!isFounderNoteSite(button.ownerDocument.location.href)) return undefined;
+  let ancestor: Element | null = button.parentElement;
+  for (let depth = 0; ancestor && depth < MAXIMUM_NOTE_SEARCH_DEPTH; depth += 1) {
+    const writtenNote = Array.from(ancestor.querySelectorAll('textarea')).find((note) => note.value.trim());
+    if (writtenNote) return writtenNote;
+    ancestor = ancestor.parentElement;
+  }
+  return undefined;
 }
+
+const isFounderNoteSend = (button: HTMLElement, label: string) =>
+  /^(send|apply|send application|submit application|submit|send message)\b/i.test(label) &&
+  findSentNote(button) !== undefined;
+
+/**
+ * YC closes the popup after Send, with no thank-you page: the note box going away (or being
+ * cleared) is the confirmation. If it stays filled, Send was refused, e.g. "write at least 50 characters".
+ */
+export const isNoteGone = (note: HTMLTextAreaElement) =>
+  !note.isConnected || note.getClientRects().length === 0 || !note.value.trim();
 
 /** A click or submit that plausibly sends an application (not search, login or "Next"). */
 export function isSubmitAction(target: Element | null): boolean {

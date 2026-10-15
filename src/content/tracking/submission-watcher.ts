@@ -5,7 +5,14 @@
  * thank-you page (Greenhouse /confirmation, Lever /thanks), or Workday's candidate home.
  * sessionStorage carries the pending submission across a same-origin page load.
  */
-import { hasSuccessText, isSubmitAction, looksLikeApplicationForm, looksSubmitted } from './submission-signals';
+import {
+  findSentNote,
+  hasSuccessText,
+  isNoteGone,
+  isSubmitAction,
+  looksLikeApplicationForm,
+  looksSubmitted,
+} from './submission-signals';
 import { readPostingUrl } from '../page/posting-url';
 
 export { isSubmitAction, looksSubmitted } from './submission-signals';
@@ -53,24 +60,28 @@ export function watchSubmissions(onApplied: (url: string) => void, isTopFrame = 
     window.clearInterval(checkTimer);
     onApplied(pending.url);
   };
-  const waitForConfirmation = (pending: PendingSubmission, textWasThere: boolean) => {
+  const waitForConfirmation = (pending: PendingSubmission, textWasThere: boolean, sentNote?: HTMLTextAreaElement) => {
     const startedAt = Date.now();
     const urlBefore = location.href;
     window.clearInterval(checkTimer);
     checkTimer = window.setInterval(() => {
-      if (looksSubmitted(document, urlBefore, textWasThere)) confirm(pending);
+      if (looksSubmitted(document, urlBefore, textWasThere) || (sentNote && isNoteGone(sentNote))) confirm(pending);
       else if (Date.now() - startedAt > CONFIRMATION_WAIT_MILLISECONDS) window.clearInterval(checkTimer);
     }, CHECK_INTERVAL_MILLISECONDS);
   };
-  const startCandidate = () => {
-    if (isConfirmed) return;
+  const startCandidate = (sentNote?: HTMLTextAreaElement) => {
+    // On a YC or Wellfound list you can send to one company after another from the same page.
+    if (isConfirmed && !sentNote) return;
+    isConfirmed = false;
     // Inside an embedded form, the top page's URL is the job; the background resolves it from the tab.
     const pending = { url: isTopFrame ? readPostingUrl() : '', at: Date.now() };
     writePending(pending);
-    waitForConfirmation(pending, hasSuccessText());
+    waitForConfirmation(pending, hasSuccessText(), sentNote);
   };
   const handleClick = (event: Event) => {
-    if (isSubmitAction(event.target as Element)) startCandidate();
+    const target = event.target as Element;
+    if (isSubmitAction(target))
+      startCandidate(target.closest?.('button, [role="button"]') ? findSentNote(target) : undefined);
   };
   const handleSubmit = (event: Event) => {
     if (looksLikeApplicationForm(event.target as HTMLFormElement)) startCandidate();
