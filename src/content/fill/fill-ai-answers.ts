@@ -1,4 +1,5 @@
 import { sendMessage, sendMessageWithin } from '../../shared/messaging/extension-messages';
+import { greetByName } from '../../shared/jobs/note-recipient';
 import type { FormQuestion, PageScan } from '../../shared/types';
 import type { Fillable } from '../form/collect-fillable-fields';
 import { findChoiceButtonGroups, isChoiceSelected } from '../form/choice-button-groups';
@@ -114,9 +115,11 @@ export async function fillAiAnswers(
       'The AI took too long. Your saved details are filled; press Autofill again to retry the questions.',
     );
     if (!reply.success) throw new Error(reply.error ?? 'AI could not prepare this application.');
-    for (const { question, elements } of aiQuestions) {
-      const answer = reply.answers?.[question.id];
-      if (!answer) continue;
+    for (const { question, elements, recipientFirstName } of aiQuestions) {
+      const modelAnswer = reply.answers?.[question.id];
+      if (!modelAnswer) continue;
+      // The page names who reads the note ("Reach out to Akash"): greet them, never "Hi team".
+      const answer = recipientFirstName ? greetByName(modelAnswer, recipientFirstName) : modelAnswer;
       for (const element of elements) {
         try {
           if (await setFieldValue(element, answer)) {

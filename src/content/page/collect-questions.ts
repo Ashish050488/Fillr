@@ -1,7 +1,7 @@
-import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import type { FormQuestion } from '../../shared/types';
 import type { Fillable } from '../form/collect-fillable-fields';
 import { hasSelection, isCombobox } from '../form/searchable-dropdown';
+import { readFounderNoteBox } from './founder-note-box';
 import { normalizeWhitespace, questionLabel, SENSITIVE } from './question-label';
 
 export { questionLabel, SENSITIVE } from './question-label';
@@ -14,6 +14,8 @@ const LONG_ANSWER_HINT =
 export interface PendingQuestion {
   question: FormQuestion;
   elements: Fillable[];
+  /** A founder note's addressee, read from the page ("Reach out to Akash"). */
+  recipientFirstName?: string;
 }
 
 function isUnanswered(element: Fillable): boolean {
@@ -36,9 +38,9 @@ export function collectQuestions(controls: Fillable[]): PendingQuestion[] {
       }
       if (!['text', 'url', 'number', ''].includes(element.type) || !isUnanswered(element)) continue;
     } else if (!isUnanswered(element)) continue;
-    // YC and Wellfound apply boxes are often an unlabelled textarea: it is the note to the founder.
-    const isFounderNote = element instanceof HTMLTextAreaElement && isFounderNoteSite(location.href);
-    const label = questionLabel(element) || (isFounderNote ? 'Note to the founder' : '');
+    // YC and Wellfound: the message box is a note to a named person, often with no label of its own.
+    const founderNoteBox = readFounderNoteBox(element, questionLabel(element));
+    const label = founderNoteBox?.label ?? questionLabel(element);
     if (!label || SENSITIVE.test(label)) continue;
     let kind: FormQuestion['kind'] = 'short';
     let options: string[] | undefined;
@@ -63,6 +65,7 @@ export function collectQuestions(controls: Fillable[]): PendingQuestion[] {
         ...(maxLength ? { maxLength } : {}),
       },
       elements: [element],
+      ...(founderNoteBox?.recipientFirstName ? { recipientFirstName: founderNoteBox.recipientFirstName } : {}),
     });
   }
   for (const radioGroup of radioGroups.values()) {
