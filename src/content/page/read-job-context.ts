@@ -1,5 +1,7 @@
 import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import { buildYcJobBrief, isYcJobUrl } from '../../shared/jobs/yc-job-brief';
+import { findCompanyName } from '../../shared/jobs/note-recipient';
+import { findListApplyPopup, readPostingUrl } from './posting-url';
 import { normalizeWhitespace } from './question-label';
 
 interface JobPosting {
@@ -90,6 +92,17 @@ export function readJobContext(): {
       jobTitle: ycBrief.title,
       company: ycBrief.company,
     };
+  // Applying from a Wellfound or YC search list: the page shows many jobs, the popup only this one.
+  const listApplyPopup = findListApplyPopup();
+  if (listApplyPopup) {
+    const popupText = listApplyPopup.innerText.trim();
+    return {
+      pageText: popupText.slice(0, 60000),
+      url: readPostingUrl(),
+      jobTitle: normalizeWhitespace(listApplyPopup.querySelector('h1, h2')?.textContent).slice(0, 300) || undefined,
+      company: findCompanyName(popupText),
+    };
+  }
   const posting = readStructuredPosting();
   const hiringOrganization = posting?.hiringOrganization;
   const company =
@@ -128,7 +141,7 @@ export function readJobContext(): {
     .find((frameSource) => ATS_FRAME.test(frameSource));
   return {
     pageText: pageText.replace(/\n{3,}/g, '\n\n').slice(0, 60000),
-    url: location.href,
+    url: readPostingUrl(),
     jobTitle: jobTitle.slice(0, 300) || undefined,
     company: company.slice(0, 300) || undefined,
     ...(atsUrl ? { atsUrl: atsUrl.slice(0, 2000) } : {}),

@@ -10,6 +10,7 @@ import { trackUserActivity } from './step-tracking';
 import { createFillController } from './widget-fill-controller';
 import { createWidget, WIDGET_HOST_ID } from './widget-markup';
 import { createWidgetView } from './widget-view';
+import { readPostingUrl } from '../page/posting-url';
 
 const REFRESH_DELAY_MILLISECONDS = 400;
 const USER_PAUSE_MILLISECONDS = 2500;
@@ -63,7 +64,7 @@ export function mountWidget(context: ContentScriptContext): void {
   elements.appliedButton.addEventListener('click', async () => {
     elements.appliedButton.disabled = true;
     try {
-      const reply = await sendMessage('MARK_JOB_APPLIED', { url: location.href });
+      const reply = await sendMessage('MARK_JOB_APPLIED', { url: readPostingUrl() });
       if (!reply.success) throw new Error(reply.error ?? 'Could not update your tracker.');
       view.showStatus('Marked as applied. Good luck.');
       elements.appliedButton.hidden = true;

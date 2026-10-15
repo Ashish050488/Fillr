@@ -31,6 +31,15 @@ export function findRecipientName(surroundingText: string): string | undefined {
   return undefined;
 }
 
+// "Reach out to Vedant at Salus" or "Start a conversation with the team at Salus."
+const COMPANY_PATTERN =
+  /\b(?:[Rr]each out to [A-Za-z'’-]+|[Tt]he team|[Tt]he founders?) at ([A-Z0-9][\w&'’ .-]{0,40}?)(?=[.,!\n]|$)/m;
+
+/** The company an apply popup names, when the page address does not identify the job. */
+export function findCompanyName(popupText: string): string | undefined {
+  return popupText.match(COMPANY_PATTERN)?.[1]?.trim() || undefined;
+}
+
 const OPENING_GREETING = /^\s*(?:hi|hey|hello|dear)\b[^,\n]{0,60},?[ \t]*\n?/i;
 
 /** "Hi Zudo team," or "Hello there," becomes "Hi Akash,"; a note with no greeting gets one. */

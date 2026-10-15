@@ -6,6 +6,7 @@
  * sessionStorage carries the pending submission across a same-origin page load.
  */
 import { hasSuccessText, isSubmitAction, looksLikeApplicationForm, looksSubmitted } from './submission-signals';
+import { readPostingUrl } from '../page/posting-url';
 
 export { isSubmitAction, looksSubmitted } from './submission-signals';
 
@@ -64,7 +65,7 @@ export function watchSubmissions(onApplied: (url: string) => void, isTopFrame = 
   const startCandidate = () => {
     if (isConfirmed) return;
     // Inside an embedded form, the top page's URL is the job; the background resolves it from the tab.
-    const pending = { url: isTopFrame ? location.href : '', at: Date.now() };
+    const pending = { url: isTopFrame ? readPostingUrl() : '', at: Date.now() };
     writePending(pending);
     waitForConfirmation(pending, hasSuccessText());
   };

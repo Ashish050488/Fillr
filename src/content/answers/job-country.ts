@@ -1,5 +1,6 @@
 import { findCountry } from '../../shared/geography/find-country';
 import { sendMessage } from '../../shared/messaging/extension-messages';
+import { readPostingUrl } from '../page/posting-url';
 
 const LOCATION_SELECTORS = [
   '[data-automation-id="locations"]',
@@ -13,7 +14,7 @@ const LOCATION_SELECTORS = [
  * from the saved posting first, then from a location shown on the page.
  */
 export async function readJobCountry(): Promise<string | undefined> {
-  const reply = await sendMessage('JOB_GET', { url: location.href }).catch(() => undefined);
+  const reply = await sendMessage('JOB_GET', { url: readPostingUrl() }).catch(() => undefined);
   const savedLocation = reply?.job?.jobFacts?.location;
   const savedCountry = findCountry(savedLocation);
   if (savedCountry) return savedCountry;

@@ -14,6 +14,7 @@ import { loadFillProfile } from './load-fill-profile';
 import { reapplyRevertedValues } from './reapply-reverted-values';
 import { isWorkday } from '../workday/workday-page';
 import { fillWorkdaySelfIdentify } from '../workday/workday-self-identify';
+import { readPostingUrl } from '../page/posting-url';
 
 export type { FillOptions, FillResult, JobContext } from './fill-types';
 
@@ -94,7 +95,7 @@ export async function fillPage(options: FillOptions = {}): Promise<FillResult> {
   if (filledCount > 0 && window.top === window) {
     await sendMessage('RECORD_FORM_FILL', {
       site: location.hostname,
-      url: location.href,
+      url: readPostingUrl(),
       fieldsFilled: filledCount,
       jobTitle: context.jobTitle ?? document.title,
       company: context.company,

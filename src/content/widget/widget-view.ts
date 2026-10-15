@@ -2,6 +2,7 @@ import { sendMessage } from '../../shared/messaging/extension-messages';
 import type { Job } from '../../shared/types';
 import type { FillResult } from '../fill/fill-types';
 import type { WidgetElements } from './widget-markup';
+import { readPostingUrl } from '../page/posting-url';
 
 const VERDICT_LABELS: Record<string, string> = {
   strong: 'Strong match',
@@ -34,7 +35,7 @@ export function createWidgetView(elements: WidgetElements) {
   };
 
   const loadFit = () =>
-    sendMessage('JOB_GET', { url: location.href })
+    sendMessage('JOB_GET', { url: readPostingUrl() })
       .then((reply) => showFit(reply.job))
       .catch(() => undefined);
 
