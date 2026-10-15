@@ -20,6 +20,13 @@ describe('form matcher', () => {
     expect(match?.value).toBe('a@example.com');
   });
 
+  it('never puts your name or email into a message box', () => {
+    const messageBox = { ...field({ name: 'name', 'aria-label': 'Your name' }), tagName: 'TEXTAREA' } as Element;
+    expect(bestMatch(messageBox, { name: 'Ashish Ranjan', email: 'a@example.com' })).toBeUndefined();
+    const addressBox = { ...field({ 'aria-label': 'Street address' }), tagName: 'TEXTAREA' } as Element;
+    expect(bestMatch(addressBox, { addressLine1: '12 MG Road' })?.key).toBe('addressLine1');
+  });
+
   it('leaves uncertain fields unmatched', () => {
     expect(
       bestMatch(field({ name: 'misc', placeholder: 'Tell us something', type: 'text' }), {

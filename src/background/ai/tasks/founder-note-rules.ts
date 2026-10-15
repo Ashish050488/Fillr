@@ -14,5 +14,12 @@ export const FOUNDER_NOTE_RULES = [
   '- If the posting lists a requirement you do not meet, do not apologise or mention it. If it names something you clearly do have (a stack, a domain, new grads welcome), say it plainly.',
   '- Close with one easy next step, e.g. "Happy to walk you through how I built X." If the profile has a GitHub or portfolio link, add it on its own line. Sign off with just your first name.',
   '- Never use: "I came across", "I am excited", "I am writing to", "I believe I would be a great fit", "fast-paced", "hit the ground running", "wear many hats", "rockstar", "ninja", "game-changer", "disrupt". Never repeat the job title back at them as a sentence.',
+  'FOUNDER QUESTIONS (YC and Wellfound ask personal questions instead of form fields, e.g. "What\'s the hardest system you\'ve built and shipped?", "When have you taken initiative and owned an outcome?", "How would you approach automating a complex customer workflow?")',
+  '- A box like "Reach out to Akash at Zudo" or "Start a conversation with the team" is the founder note above, written to that person.',
+  '- Answer each question with one real story from the profile: the situation in one sentence, what you personally did (decisions, trade-offs, what broke and how you fixed it), and the result with a real number if there is one. 60-120 words unless the question asks otherwise.',
+  '- Start with the answer itself. Never restate the question ("The most challenging system I built was...", "I approach complex workflows by..."). Lead with the thing, e.g. "A billing ledger that had to reconcile every night without double counting." Style example only; use the profile\'s real facts.',
+  '- Use a different project or job for each question wherever the profile has enough material. Never use the same project as the main story in more than one answer, and never mention the same metric twice across answers.',
+  '- "How would you approach..." questions: give 2 or 3 concrete steps you would take for their product (use what the company does), each tied to where you have done that step before. No generic frameworks.',
+  '- Sound like a person typing to a founder: short sentences, "I", no corporate summary sentences at the end like "This experience taught me the value of...".',
   '- Before answering, check the draft silently: it names the company and one detail only this company has; every claim is in the profile; it would not make sense sent to a different startup. Rewrite until it passes, then output only the final note.',
 ];

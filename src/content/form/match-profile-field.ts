@@ -128,8 +128,16 @@ export function fieldSignals(element: Element): string[] {
     .filter(Boolean);
 }
 
+// A message box ("Reach out to Akash", "Tell us about you") is never your name or email; only a
+// street address is sometimes asked for in a multi-line box.
+const MULTI_LINE_PROFILE_KEYS = new Set(['addressline1']);
+
+const isMultiLine = (element: Element) =>
+  element.tagName === 'TEXTAREA' || (element as HTMLElement).isContentEditable === true;
+
 export function bestMatch(element: Element, profile: ProfileValues): Match | undefined {
   const signals = fieldSignals(element);
+  const isMessageBox = isMultiLine(element);
   const nearby = normalise(element.parentElement?.textContent?.slice(0, 180) ?? '');
   const type = (element as HTMLInputElement).type;
   const auto = (element.getAttribute('autocomplete') ?? '').split(/\s+/).pop() ?? '';
@@ -138,7 +146,7 @@ export function bestMatch(element: Element, profile: ProfileValues): Match | und
     if (!value.trim()) continue;
     const canonical = normalise(key).replace(/ /g, '');
     const terms = aliases[canonical];
-    if (!terms) continue;
+    if (!terms || (isMessageBox && !MULTI_LINE_PROFILE_KEYS.has(canonical))) continue;
     if (
       canonical === 'name' &&
       signals.some((signal) => /\b(first|last|middle|given|family|company|user)\b/.test(signal))
