@@ -1,9 +1,12 @@
 import { profileSchema } from '../../shared/schemas';
 import { getStorage, STORAGE_KEYS } from '../../shared/storage/extension-storage';
 import { derivedFields } from '../../shared/resume/derived-profile-fields';
+import { properName } from '../../shared/resume/resume-facts';
 import type { MessageMap } from '../../shared/types';
 
 type FillProfileReply = MessageMap['GET_FILL_PROFILE']['response'];
+
+const NAME_FIELDS = ['name', 'firstName', 'middleName', 'lastName', 'preferredName'];
 
 const EMPTY_PROFILE_MESSAGE =
   'Your JobFill profile is empty. Open the JobFill panel and add your resume first. Nothing was filled.';
@@ -27,6 +30,10 @@ export async function buildFillProfile(): Promise<FillProfileReply> {
   for (const [fieldName, derivedValue] of Object.entries(derivedFields(profile))) {
     if (derivedValue && !fields[fieldName]) fields[fieldName] = { value: derivedValue };
   }
+  // Forms get "Ashish Ranjan", never a resume's "ASHISH RANJAN", and the email in lower case.
+  for (const fieldName of NAME_FIELDS)
+    if (fields[fieldName]) fields[fieldName] = { value: properName(fields[fieldName].value.trim()) };
+  if (fields.email) fields.email = { value: fields.email.value.trim().toLowerCase() };
   if (!fields.email?.value && !fields.name?.value && !fields.firstName?.value) {
     return { success: false, fields: {}, error: EMPTY_PROFILE_MESSAGE };
   }

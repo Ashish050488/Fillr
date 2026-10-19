@@ -1,4 +1,5 @@
 import type { FillSession } from './fill-session';
+import { fillElement } from '../form/set-field-value';
 
 const RENDER_SETTLE_MILLISECONDS = 350;
 
@@ -11,16 +12,26 @@ export async function reapplyRevertedValues(session: FillSession): Promise<void>
   if (!session.intendedValues.size) return;
   await new Promise((resolve) => setTimeout(resolve, RENDER_SETTLE_MILLISECONDS));
   for (const [field, intendedValue] of session.intendedValues) {
-    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) continue;
-    if (field.value === intendedValue || field.value.trim()) continue; // Kept, or reformatted by the site.
+    if (!isEmptyAfterRender(field, intendedValue)) continue;
     try {
-      field.focus();
-      field.select();
-      const isTyped = field.ownerDocument.execCommand('insertText', false, intendedValue);
-      if (!isTyped || field.value !== intendedValue) session.filledFields.delete(field);
-      field.blur();
+      if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+        field.focus();
+        field.select();
+        const isTyped = field.ownerDocument.execCommand('insertText', false, intendedValue);
+        if (!isTyped || field.value !== intendedValue) session.filledFields.delete(field);
+        field.blur();
+      } else if (!fillElement(field, intendedValue)) session.filledFields.delete(field);
     } catch {
       session.filledFields.delete(field);
     }
   }
+}
+
+function isEmptyAfterRender(field: Element, intendedValue: string): boolean {
+  if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)
+    return !field.value.trim() && field.value !== intendedValue;
+  if (field instanceof HTMLSelectElement) return !field.value || field.selectedIndex <= 0;
+  if ((field as HTMLElement).isContentEditable || field.getAttribute('role') === 'textbox')
+    return !field.textContent?.trim();
+  return false;
 }

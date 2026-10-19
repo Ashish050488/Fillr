@@ -14,13 +14,57 @@ export function nativeSet(element: Element, property: string, value: string | bo
 }
 
 export function notifyChange(element: Element): void {
-  const EventConstructor = element.ownerDocument.defaultView?.Event ?? Event;
-  element.dispatchEvent(new EventConstructor('input', { bubbles: true, composed: true }));
+  const view = element.ownerDocument.defaultView;
+  const InputEventConstructor = view?.InputEvent ?? InputEvent;
+  element.dispatchEvent(
+    new InputEventConstructor('input', {
+      bubbles: true,
+      composed: true,
+      inputType: 'insertText',
+    }),
+  );
+  const EventConstructor = view?.Event ?? Event;
   element.dispatchEvent(new EventConstructor('change', { bubbles: true, composed: true }));
   // Some frameworks (Workday, Formik) validate and commit only on blur.
   const FocusConstructor = element.ownerDocument.defaultView?.FocusEvent ?? FocusEvent;
   element.dispatchEvent(new FocusConstructor('blur', { bubbles: false }));
   element.dispatchEvent(new FocusConstructor('focusout', { bubbles: true, composed: true }));
+}
+
+const CONSENT_SIGNAL = /\b(accept|agree|consent|privacy|terms|subscribe|marketing|communications?)\b/i;
+
+function isConsentCheckbox(input: HTMLInputElement): boolean {
+  const labelText = Array.from(input.labels ?? [])
+    .map((label) => label.textContent ?? '')
+    .join(' ');
+  const signals = [input.name, input.id, input.getAttribute('aria-label'), input.getAttribute('title'), labelText].join(
+    ' ',
+  );
+  return CONSENT_SIGNAL.test(signals);
+}
+
+function activateEditableControl(element: HTMLElement): void {
+  if (typeof element.focus === 'function') element.focus({ preventScroll: true });
+}
+
+function readEditableValue(element: HTMLElement): string {
+  if ('value' in element) {
+    const value = (element as HTMLElement & { value?: unknown }).value;
+    if (typeof value === 'string') return value;
+  }
+  return element.textContent ?? '';
+}
+
+function writeEditableValue(element: HTMLElement, value: string): void {
+  if ('value' in element) {
+    try {
+      nativeSet(element, 'value', value);
+      return;
+    } catch {
+      // Some custom textboxes expose a value property without a prototype setter.
+    }
+  }
+  element.textContent = value;
 }
 
 export function fillElement(element: Element, value: string): boolean {
@@ -36,7 +80,7 @@ export function fillElement(element: Element, value: string): boolean {
       nativeSet(input, 'checked', true);
     } else if (input.type === 'checkbox') {
       // Never consent, subscribe, or accept terms on the person's behalf.
-      if (input.checked || !/^(yes|true)$/i.test(value)) return false;
+      if (input.checked || isConsentCheckbox(input) || !/^(yes|true)$/i.test(value)) return false;
       nativeSet(input, 'checked', true);
     } else {
       if (input.value.trim()) return false;
@@ -57,9 +101,11 @@ export function fillElement(element: Element, value: string): boolean {
     );
     if (matches.length !== 1) return false;
     nativeSet(select, 'value', matches[0].value);
-  } else if ((element as HTMLElement).isContentEditable) {
-    if (element.textContent?.trim()) return false;
-    element.textContent = value;
+  } else if ((element as HTMLElement).isContentEditable || element.getAttribute('role') === 'textbox') {
+    const editable = element as HTMLElement;
+    if (readEditableValue(editable).trim()) return false;
+    activateEditableControl(editable);
+    writeEditableValue(editable, value);
   } else return false;
   notifyChange(element);
   return true;

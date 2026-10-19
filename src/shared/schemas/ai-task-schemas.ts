@@ -48,7 +48,9 @@ const answerQuestionsContextSchema = z
     company: titleText,
     questions: z.array(questionSchema).min(1).max(40),
     style: styleSchema.optional(),
-    audience: z.enum(['yc-founder', 'linkedin-referral', 'linkedin-coach']).optional(),
+    audience: z
+      .enum(['yc-founder', 'linkedin-referral', 'linkedin-coach', 'interview-prep', 'profile-boost', 'resume-tailor'])
+      .optional(),
   })
   .strict();
 const jobParsingContextSchema = z

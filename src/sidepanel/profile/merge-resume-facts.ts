@@ -28,7 +28,7 @@ export function mergeResumeFacts(profile: Profile, facts: ResumeFacts): Profile 
   values.linkedin = values.linkedin?.includes('linkedin.com') ? values.linkedin : (found.linkedin ?? values.linkedin);
   values.github = values.github?.includes('github.com') ? values.github : (found.github ?? values.github);
   values.portfolio = values.portfolio || found.portfolio;
-  values.email = values.email || found.email;
+  values.email = (values.email || found.email)?.trim().toLowerCase();
   values.phone = values.phone || found.phone;
   const years = totalExperienceYears(facts.experience ?? []);
   if (years !== undefined) values.yearsExperience = String(years);

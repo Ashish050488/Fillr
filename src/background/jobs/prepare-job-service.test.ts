@@ -132,7 +132,7 @@ describe('prepareJob', () => {
   });
 
   it('holds questions for a weak fit until you choose Fill anyway', async () => {
-    const { prepareJob } = await setup(30);
+    const { prepareJob } = await setup(20);
     const held = await prepareJob({ scan: scan('https://x.example/job/7', [letter, why]) });
     expect(held).toMatchObject({ held: true, answers: {} });
     expect(calls('answer_questions')).toBe(0);
@@ -144,7 +144,7 @@ describe('prepareJob', () => {
   });
 
   it('analyses without writing extra answers when only checking fit', async () => {
-    const { prepareJob } = await setup(30);
+    const { prepareJob } = await setup(20);
     await prepareJob({ scan: scan('https://x.example/job/8', [why]), analyzeOnly: true, force: true });
     expect(calls('answer_questions')).toBe(0);
   });

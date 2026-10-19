@@ -2,6 +2,7 @@
 import type { AIProvider, AITask, AITaskContext, AITaskResult, AnswerStyle, FormQuestion } from './ai';
 import type { Job, JobStatus, PageScan } from './job';
 import type { Resume } from './profile';
+import type { ProfileBoost, ProfilePageScan } from './profile-boost';
 import type {
   LinkedInCoach,
   LinkedInProfileSnapshot,
@@ -108,6 +109,8 @@ export interface MessageMap {
     response: { success: boolean; job?: Job; error?: string };
   };
   JOB_DELETE: { request: { key: string }; response: { success: boolean; error?: string } };
+  JOB_INTERVIEW_PREP: { request: { key: string }; response: { success: boolean; job?: Job; error?: string } };
+  JOB_TAILOR_RESUME: { request: { key: string }; response: { success: boolean; job?: Job; error?: string } };
   FRAMES_SCAN: { request: undefined; response: { success: boolean; questions: FormQuestion[] } };
   FILL_FRAMES: {
     request: { context: { url: string; pageText: string; jobTitle?: string; company?: string }; force?: boolean };
@@ -154,6 +157,20 @@ export interface MessageMap {
   LINKEDIN_COACH: {
     request: { refresh?: boolean } | undefined;
     response: { success: boolean; coach?: LinkedInCoach; error?: string };
+  };
+  PROFILE_PAGE_SCAN: { request: undefined; response: { success: boolean; scan?: ProfilePageScan; error?: string } };
+  PROFILE_PAGE_WRITE: {
+    request: { fieldId: string; value: string; maxLength?: number };
+    response: { success: boolean; error?: string };
+  };
+  PROFILE_PAGE_ADD_SKILLS: {
+    request: { skills: string[] };
+    response: { success: boolean; added: string[]; error?: string };
+  };
+  /** cachedOnly: return the saved rewrite for this page, or nothing, without calling AI. */
+  PROFILE_BOOST: {
+    request: { scan: ProfilePageScan; refresh?: boolean; cachedOnly?: boolean };
+    response: { success: boolean; boost?: ProfileBoost; error?: string };
   };
   CONTENT_MESSAGE: {
     request: { type: string; payload?: unknown };

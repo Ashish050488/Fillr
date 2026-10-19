@@ -1,5 +1,6 @@
 /** A job posting as JobFill tracks it, from first visit to submitted application. */
 import type { FitAnalysis, FormQuestion } from './ai';
+import type { PostingSignal } from '../jobs/posting-signals';
 import type { Profile } from './profile';
 
 export interface PageScan {
@@ -9,6 +10,8 @@ export interface PageScan {
   company?: string;
   questions: FormQuestion[];
   /** An embedded ATS iframe, e.g. Greenhouse on a careers page. */ atsUrl?: string;
+  /** Age, applicants, pay listed: read from the page without AI. */
+  signals?: PostingSignal[];
 }
 export interface JobFacts {
   title?: string;
@@ -52,6 +55,27 @@ export interface Job {
   appliedAt?: number;
   /** Applied was detected from the site's confirmation, not set by hand. */
   appliedAuto?: boolean;
+  /** Posting age, reposts, applicant count and pay, as last read from the page. */
+  postingSignals?: PostingSignal[];
+  interviewPrep?: InterviewPrep;
+  tailoredResume?: TailoredResume;
+}
+
+/** Your resume's summary and best bullets rewritten in this posting's words, with keyword coverage. */
+export interface TailoredResume {
+  summary: string;
+  bullets: Array<{ source: string; text: string }>;
+  keywordsCovered: string[];
+  keywordsMissing: string[];
+  createdAt: number;
+}
+
+/** Likely interview questions with your matching stories, and questions to ask them. */
+export interface InterviewPrep {
+  questions: string[];
+  stories: string[];
+  askThem: string[];
+  createdAt: number;
 }
 export interface LifetimeMetrics {
   totalFormsFilled: number;

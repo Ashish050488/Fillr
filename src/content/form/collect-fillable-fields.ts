@@ -6,14 +6,15 @@ export function collectFillables(
   const fillableFields: Fillable[] = [];
   // Workday and similar ATSs render dropdowns as buttons that open a listbox.
   const controls = root.querySelectorAll<Fillable>(
-    'input, textarea, select, [contenteditable="true"], button[aria-haspopup="listbox"]',
+    'input, textarea, select, [contenteditable="true"], [role="textbox"], [role="combobox"], button[aria-haspopup="listbox"]',
   );
   for (const control of Array.from(controls)) {
     if (
       seen.has(control) ||
       control.closest('#jobfill-panel-host') ||
       control.hasAttribute('disabled') ||
-      control.hasAttribute('readonly')
+      control.hasAttribute('readonly') ||
+      control.getAttribute('aria-disabled') === 'true'
     )
       continue;
     if (

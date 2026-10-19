@@ -38,6 +38,12 @@ export const MESSAGE_ACTIONS: readonly MessageAction[] = [
   'REFERRAL_UPDATE',
   'REFERRAL_DELETE',
   'LINKEDIN_COACH',
+  'JOB_INTERVIEW_PREP',
+  'JOB_TAILOR_RESUME',
+  'PROFILE_PAGE_SCAN',
+  'PROFILE_PAGE_WRITE',
+  'PROFILE_PAGE_ADD_SKILLS',
+  'PROFILE_BOOST',
 ];
 
 export function isMessageAction(candidate: unknown): candidate is MessageAction {

@@ -3,7 +3,10 @@ import { registerFrameHooks } from '../src/content/fill/page-scan';
 import { watchSubmissions } from '../src/content/tracking/submission-watcher';
 import { mountReferralWidget } from '../src/content/linkedin/mount-referral-widget';
 import { mountWidget } from '../src/content/widget/mount-widget';
-import { sendMessage } from '../src/shared/messaging/extension-messages';
+import { registerProfilePageHandlers } from '../src/content/profile/write-profile-page';
+import { isProfileEditPage } from '../src/shared/jobs/profile-pages';
+import { onMessage, sendMessage } from '../src/shared/messaging/extension-messages';
+import { scanPage } from '../src/content/fill/page-scan';
 
 type PageWindow = Window & { __jobfill_alive?: () => boolean };
 
@@ -31,8 +34,15 @@ export default defineContentScript({
         return false;
       }
     };
+    // The panel can rewrite your profile on any site it knows; single-page sites navigate without a reload.
+    registerProfilePageHandlers();
+    // Your own profile editor is not an application: no Fill now there.
+    if (isProfileEditPage(location.href)) return;
     // On LinkedIn you only ask for referrals: the referral widget replaces Fill now there.
-    if (/(^|\.)linkedin\.com$/i.test(location.hostname)) mountReferralWidget(context);
-    else mountWidget(context);
+    if (/(^|\.)linkedin\.com$/i.test(location.hostname)) {
+      mountReferralWidget(context);
+      // The panel still checks your fit on LinkedIn job postings; it only needs the page read.
+      onMessage('SCAN_PAGE', async () => ({ success: true, scan: await scanPage() }));
+    } else mountWidget(context);
   },
 });

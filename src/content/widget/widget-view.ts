@@ -10,7 +10,7 @@ const VERDICT_LABELS: Record<string, string> = {
   stretch: 'A stretch',
   weak: 'Weak match',
 };
-const WEAK_FIT_BELOW_SCORE = 55;
+const WEAK_FIT_BELOW_SCORE = 30;
 
 export type StatusKind = 'normal' | 'error' | 'busy';
 

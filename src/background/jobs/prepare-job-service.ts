@@ -10,8 +10,11 @@ import { findCoverLetterAnswer, findSavedAnswer, keyAnswersByLabel } from './sav
 export { ensureJobMeta } from './job-facts-service';
 export { rewriteCoverLetter } from './cover-letter-service';
 
-/** Below this, JobFill fills only your saved details unless you choose "Fill anyway". */
-export const FIT_THRESHOLD = 55;
+/**
+ * Below this the role is so far off that writing answers wastes your AI quota; above it, AI
+ * answers every question from your resume, even for a stretch role (you still review).
+ */
+export const FIT_THRESHOLD = 30;
 const MAXIMUM_PAGE_TEXT_LENGTH = 12000;
 
 export interface PrepareOptions {
@@ -60,6 +63,8 @@ async function prepareJobOnce({ scan, force, refresh, analyzeOnly, onStage }: Pr
     ...(isFounderNote ? { audience: 'yc-founder' as const } : {}),
   };
   let job = await ensureJobMeta(scan.url, scan);
+  if (scan.signals?.length)
+    job = await updateJob(scan.url, (current) => ({ ...current, postingSignals: scan.signals }));
   if (!job.jobFacts || refresh) onStage?.('Reading the job description…');
   const jobFacts = await loadJobFacts(refresh ? undefined : job, scan);
   const postingText = buildPostingText(jobFacts, scan.pageText.slice(0, MAXIMUM_PAGE_TEXT_LENGTH));

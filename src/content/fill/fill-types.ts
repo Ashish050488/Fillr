@@ -1,3 +1,5 @@
+import type { FillStage } from './fill-report';
+
 export interface FillResult {
   success: boolean;
   filledCount: number;
@@ -25,6 +27,8 @@ export interface FillOptions {
   /** "Fill anyway": write answers even for a weak fit. */
   force?: boolean;
   onProgress?: (text: string) => void;
+  /** Moves the widget's progress bar: reading the page, your details, answers, checking. */
+  onStage?: (stage: FillStage) => void;
   /** Automatic re-fill on a new step: never touch a field this page already tried. */
   auto?: boolean;
   /** Set when filling inside an iframe: the posting lives in the parent page. */

@@ -137,3 +137,44 @@
   border-left-style: double;
   border-left-width: 5px;
 }
+
+/* Tailored resume: each line is a button that copies itself. */
+.tailored-resume .chip.missing {
+  border-style: dashed;
+  opacity: 0.8;
+}
+.tailored-line {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px dashed var(--ink);
+  border-radius: 255px 12px 225px 12px / 12px 225px 12px 255px;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+.tailored-line:hover {
+  transform: translate(-1px, -1px);
+  background: rgba(0, 0, 0, 0.04);
+}
+.tailored-line:active {
+  transform: scale(0.98);
+}
+.tailored-line b {
+  margin-right: 4px;
+}
+.row.end {
+  justify-content: flex-end;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tailored-line {
+    transition: none;
+  }
+}

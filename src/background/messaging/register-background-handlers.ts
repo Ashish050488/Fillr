@@ -4,6 +4,7 @@ import { registerAnswerHandlers } from './answer-handlers';
 import { registerFrameHandlers } from './frame-handlers';
 import { registerJobHandlers } from './job-handlers';
 import { createMessageRegistrar } from './message-registrar';
+import { registerProfileBoostHandlers } from './profile-boost-handlers';
 import { registerReferralHandlers } from './referral-handlers';
 
 export { isExtensionPage } from './message-registrar';
@@ -16,5 +17,6 @@ export function registerBackgroundHandlers(storageReady: Promise<unknown> = Prom
   registerFrameHandlers(handle);
   registerAnswerHandlers(handle);
   registerReferralHandlers(handle);
+  registerProfileBoostHandlers(handle);
   handle('GET_FILL_PROFILE', buildFillProfile);
 }

@@ -47,7 +47,13 @@ export interface AnswerQuestionsContext {
   questions: FormQuestion[];
   style?: AnswerStyle;
   /** "yc-founder": a note to a startup founder. "linkedin-referral": asking someone for a referral. */
-  audience?: 'yc-founder' | 'linkedin-referral' | 'linkedin-coach';
+  audience?:
+    | 'yc-founder'
+    | 'linkedin-referral'
+    | 'linkedin-coach'
+    | 'interview-prep'
+    | 'profile-boost'
+    | 'resume-tailor';
 }
 export type FitVerdict = 'strong' | 'good' | 'stretch' | 'weak';
 export interface FitAnalysis {

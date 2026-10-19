@@ -1,7 +1,10 @@
 import type { AnswerQuestionsContext, CoverLetterContext } from '../../../shared/types';
 import { SOURCE_RULES, toJson } from './extraction-prompts';
 import { FOUNDER_NOTE_RULES } from './founder-note-rules';
+import { INTERVIEW_PREP_RULES } from './interview-prep-rules';
+import { RESUME_TAILOR_RULES } from './resume-tailor-rules';
 import { LINKEDIN_COACH_RULES } from './linkedin-coach-rules';
+import { PROFILE_BOOST_RULES } from './profile-boost-rules';
 import { REFERRAL_MESSAGE_RULES } from './referral-message-rules';
 
 export type JobMatchContext = AnswerQuestionsContext & { minScore: number };
@@ -37,7 +40,13 @@ function buildWritingRules(writingContext: WritingContext): string[] {
         ? REFERRAL_MESSAGE_RULES
         : writingContext.audience === 'linkedin-coach'
           ? LINKEDIN_COACH_RULES
-          : COVER_LETTER_RULES(style.length ?? 'medium')),
+          : writingContext.audience === 'interview-prep'
+            ? INTERVIEW_PREP_RULES
+            : writingContext.audience === 'profile-boost'
+              ? PROFILE_BOOST_RULES
+              : writingContext.audience === 'resume-tailor'
+                ? RESUME_TAILOR_RULES
+                : COVER_LETTER_RULES(style.length ?? 'medium')),
     'QUESTION KINDS',
     '- "long": a cover letter or founder note (follow the rules above) or an open question: 60-150 words unless it asks otherwise.',
     '- "short": just the value or one short sentence. Respect maxLength.',

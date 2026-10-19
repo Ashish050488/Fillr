@@ -4,6 +4,7 @@ import Dropdown from '../../components/Dropdown';
 import Icon from '../../components/Icon';
 import Sheet from '../../components/Sheet';
 import { copyText } from '../../services/text-export';
+import { FollowUpPanel, InterviewPrepPanel } from './ApplicationExtras';
 import { formatShortDate, formatStatus, hostnameOf, SELECTABLE_STATUSES } from './tracker-filters';
 
 interface ApplicationSheetProps {
@@ -51,6 +52,8 @@ export default function ApplicationSheet({ job, onClose, onUpdate, onDelete, onT
         />
       </div>
       <p className="muted small">Choosing "Not submitted" removes it from this list.</p>
+      <FollowUpPanel job={job} onUpdate={onUpdate} />
+      <InterviewPrepPanel job={job} onToast={onToast} />
       {job.coverLetter ? (
         <textarea
           className="letter"

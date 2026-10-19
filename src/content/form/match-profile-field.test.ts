@@ -89,6 +89,21 @@ describe('form matcher', () => {
     );
   });
 
+  it('uses described text, titles and field metadata as matching signals', () => {
+    const description = { textContent: 'Personal email address' };
+    const input = field({
+      title: 'Email address',
+      'aria-describedby': 'email-help',
+      'data-field': 'candidateEmail',
+      type: 'text',
+    }) as HTMLInputElement & { getRootNode: () => Document };
+    input.getRootNode = () =>
+      ({
+        getElementById: (id: string) => (id === 'email-help' ? description : null),
+      }) as unknown as Document;
+    expect(bestMatch(input, { email: 'a@example.com' })?.key).toBe('email');
+  });
+
   it('never puts the phone number into Phone Extension or Phone Device Type', () => {
     const profile = { phone: '+91 98355 90439', phoneDeviceType: 'Mobile' };
     expect(bestMatch(field({ 'aria-label': 'Phone Extension', type: 'text' }), profile)).toBeUndefined();

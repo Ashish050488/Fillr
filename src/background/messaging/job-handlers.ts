@@ -1,6 +1,8 @@
 import { jobPrepareSchema } from '../../shared/schemas';
 import { deleteJob, getJob, getJobByKey, updateJob } from '../jobs/job-store';
 import { jobsMissingTitles, markApplied, recordFill, setStatus } from '../jobs/job-tracking';
+import { prepareInterview } from '../jobs/interview-prep-service';
+import { tailorResume } from '../jobs/resume-tailor-service';
 import { ensureJobMeta, prepareJob, rewriteCoverLetter } from '../jobs/prepare-job-service';
 import { describeError, isExtensionPage, type RegisterMessageHandler } from './message-registrar';
 
@@ -58,6 +60,24 @@ export function registerJobHandlers(handle: RegisterMessageHandler): void {
       return { success: true, job: await rewriteCoverLetter(key, style) };
     } catch (error) {
       return { success: false, error: describeError(error, undefined, 'Could not rewrite the letter.') };
+    }
+  });
+
+  handle('JOB_INTERVIEW_PREP', async ({ key }, sender) => {
+    if (!isExtensionPage(sender)) return { success: false, error: 'Only the JobFill panel can prepare interviews.' };
+    try {
+      return { success: true, job: await prepareInterview(String(key)) };
+    } catch (error) {
+      return { success: false, error: describeError(error, undefined, 'Could not prepare the interview.') };
+    }
+  });
+
+  handle('JOB_TAILOR_RESUME', async ({ key }, sender) => {
+    if (!isExtensionPage(sender)) return { success: false, error: 'Only the JobFill panel can tailor your resume.' };
+    try {
+      return { success: true, job: await tailorResume(String(key)) };
+    } catch (error) {
+      return { success: false, error: describeError(error, undefined, 'Could not tailor your resume.') };
     }
   });
 

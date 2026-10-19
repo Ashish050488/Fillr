@@ -1,6 +1,7 @@
 import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
 import { buildYcJobBrief, isYcJobUrl } from '../../shared/jobs/yc-job-brief';
 import { findCompanyName } from '../../shared/jobs/note-recipient';
+import { readPostingSignals, type PostingSignal } from '../../shared/jobs/posting-signals';
 import { findListApplyPopup, readPostingUrl } from './posting-url';
 import { normalizeWhitespace } from './question-label';
 
@@ -83,6 +84,7 @@ export function readJobContext(): {
   jobTitle?: string;
   company?: string;
   atsUrl?: string;
+  signals?: PostingSignal[];
 } {
   const ycBrief = readYcBrief();
   if (ycBrief)
@@ -145,5 +147,7 @@ export function readJobContext(): {
     jobTitle: jobTitle.slice(0, 300) || undefined,
     company: company.slice(0, 300) || undefined,
     ...(atsUrl ? { atsUrl: atsUrl.slice(0, 2000) } : {}),
+    // Posting age and applicant count sit in the page header, outside the description.
+    signals: readPostingSignals(document.body.innerText),
   };
 }

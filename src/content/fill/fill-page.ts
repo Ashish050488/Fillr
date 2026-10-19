@@ -12,6 +12,7 @@ import { FillSession } from './fill-session';
 import type { FillOptions, FillResult, JobContext } from './fill-types';
 import { loadFillProfile } from './load-fill-profile';
 import { reapplyRevertedValues } from './reapply-reverted-values';
+import { buildFillReport, type FillReportRow } from './fill-report';
 import { isWorkday } from '../workday/workday-page';
 import { fillWorkdaySelfIdentify } from '../workday/workday-self-identify';
 import { readPostingUrl } from '../page/posting-url';
@@ -40,13 +41,23 @@ async function fillEmbeddedForms(context: JobContext, force?: boolean) {
   }
 }
 
+/** "12 of 14 done, 3 written for this job. 2 need you." Counts what is on the page, not just this run. */
+function describeReport(report: FillReportRow[], aiCount: number): string {
+  const needCount = report.filter((row) => row.status === 'needs-you').length;
+  const aiNote = aiCount ? `, ${aiCount} written for this job` : '';
+  const next = needCount ? `${needCount} need${needCount === 1 ? 's' : ''} you.` : 'Review, then submit.';
+  return `${report.length - needCount} of ${report.length} done${aiNote}. ${next}`;
+}
+
 /**
  * Fill this application: saved details (instant), then AI answers for real questions, then
  * "decline" for demographic questions, then any embedded forms. Never submits.
  */
 export async function fillPage(options: FillOptions = {}): Promise<FillResult> {
   const reportProgress = options.onProgress ?? (() => undefined);
-  reportProgress('Filling your saved details…');
+  const reportStage = options.onStage ?? (() => undefined);
+  reportStage('reading');
+  reportProgress('Reading this form…');
   const fields = collectFillables();
   // Button-row questions (Ashby Yes/No) are not inputs, but each one is a field to fill.
   const choiceGroupCount = findChoiceButtonGroups().length;
@@ -60,6 +71,8 @@ export async function fillPage(options: FillOptions = {}): Promise<FillResult> {
   }
 
   const session = new FillSession();
+  reportStage('details');
+  reportProgress('Filling your saved details…');
   const isDialCodeSeparate = hasDialCodeField(fields);
   await fillSavedDetails(profile, fields, session, {
     isAutomatic: options.auto,
@@ -68,16 +81,21 @@ export async function fillPage(options: FillOptions = {}): Promise<FillResult> {
   });
   await reapplyRevertedValues(session);
   const savedDetailCount = session.filledFields.size;
+  const savedDetailFields = new Set(session.filledFields);
+  reportStage('answers');
 
   const context = options.context ?? readJobContext();
   const aiOutcome = await fillAiAnswers(fields, context, session, {
     force: options.force,
     isAutomatic: options.auto,
     reportProgress,
+    applicantName: profile.values.name,
   });
   await declineDemographicQuestions(fields, session, isDialCodeSeparate);
   if (isWorkday()) fillWorkdaySelfIdentify(profile.values.name, session);
   const embedded = await fillEmbeddedForms(context, options.force);
+  reportStage('checking');
+  const report = buildFillReport(fields, session, savedDetailFields, findChoiceButtonGroups());
 
   const filledCount = session.filledFields.size + embedded.filled;
   const totalCount = fields.length + choiceGroupCount + embedded.total;
@@ -86,7 +104,7 @@ export async function fillPage(options: FillOptions = {}): Promise<FillResult> {
   const scoreNote = aiOutcome.score !== undefined ? ` (${aiOutcome.score}%)` : '';
   const message = isHeldBack
     ? `Filled ${filledCount} saved details. This role looks like a weak fit${scoreNote}, so its questions were left for you.`
-    : `Filled ${filledCount} of ${totalCount} fields${aiCount ? `, ${aiCount} answered for this job` : ''}. Review, then submit.`;
+    : describeReport(report, aiCount);
   const skipped = fields
     .filter((field) => !session.isFilled(field))
     .map((field) => questionLabel(field) || fieldSignals(field)[0] || 'Unrecognised field')

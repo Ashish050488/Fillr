@@ -8,6 +8,8 @@ import { collectQuestions, questionLabel, SENSITIVE, type PendingQuestion } from
 import { readJobCountry } from '../answers/job-country';
 import { fillRememberedAnswers, isDeclaration, setQuestionsToAsk } from '../answers/remembered-answers';
 import { insideEntries } from '../workday/workday-history';
+import { isDatePickerField } from '../form/date-picker';
+import { attachCoverLetterPdf, COVER_LETTER_FILE_QUESTION, findCoverLetterUploads } from './cover-letter-upload';
 import { setFieldValue } from './fill-saved-details';
 import { attemptedFields, type FillSession } from './fill-session';
 import type { JobContext } from './fill-types';
@@ -73,10 +75,17 @@ export async function fillAiAnswers(
   fields: Fillable[],
   context: JobContext,
   session: FillSession,
-  options: { force?: boolean; isAutomatic?: boolean; reportProgress: (text: string) => void },
+  options: {
+    force?: boolean;
+    isAutomatic?: boolean;
+    reportProgress: (text: string) => void;
+    /** Names the generated cover letter file: "Ashish Ranjan - Cover Letter.pdf". */
+    applicantName?: string;
+  },
 ): Promise<AiAnswerOutcome> {
   const pendingQuestions = collectQuestions(
-    fields.filter((field) => !session.isFilled(field) && !insideEntries(field)),
+    // Calendars take a date from your profile, never AI prose.
+    fields.filter((field) => !session.isFilled(field) && !insideEntries(field) && !isDatePickerField(field)),
   );
   pendingQuestions.push(...(await collectButtonDropdownQuestions(fields, session, options.isAutomatic)));
   pendingQuestions.push(...collectChoiceButtonQuestions());
@@ -95,7 +104,10 @@ export async function fillAiAnswers(
     isTopFrame() && document.querySelector('iframe')
       ? ((await sendMessage('FRAMES_SCAN', undefined).catch(() => undefined))?.questions ?? [])
       : [];
-  const questionCount = aiQuestions.length + embeddedQuestions.length;
+  // A cover letter asked for as a file: AI writes it with the rest, then it is attached as a PDF.
+  const coverLetterUploads = findCoverLetterUploads();
+  const coverLetterFileQuestions = coverLetterUploads.length ? [COVER_LETTER_FILE_QUESTION] : [];
+  const questionCount = aiQuestions.length + embeddedQuestions.length + coverLetterFileQuestions.length;
   if (!questionCount) return { held: false };
 
   const savedDetailCount = session.filledFields.size;
@@ -103,10 +115,11 @@ export async function fillAiAnswers(
     `Filled ${savedDetailCount} saved details. Writing ${questionCount} answer${questionCount === 1 ? '' : 's'}…`,
   );
   try {
-    const allQuestions = [...aiQuestions.map((pending) => pending.question), ...embeddedQuestions].slice(
-      0,
-      MAXIMUM_QUESTIONS,
-    );
+    const allQuestions = [
+      ...coverLetterFileQuestions,
+      ...aiQuestions.map((pending) => pending.question),
+      ...embeddedQuestions,
+    ].slice(0, MAXIMUM_QUESTIONS);
     // Bounded: if the AI is slow or the background restarts, your saved details are already in.
     const reply = await sendMessageWithin(
       'JOB_PREPARE',
@@ -131,6 +144,9 @@ export async function fillAiAnswers(
         }
       }
     }
+    const coverLetter = reply.answers?.[COVER_LETTER_FILE_QUESTION.id] || reply.job?.coverLetter || '';
+    if (coverLetterUploads.length)
+      attachCoverLetterPdf(coverLetterUploads, coverLetter, session, options.applicantName);
     rememberLeftovers();
     return { held: Boolean(reply.held), score: reply.job?.analysis?.score, askCount: declarationQuestions.length };
   } catch (error) {

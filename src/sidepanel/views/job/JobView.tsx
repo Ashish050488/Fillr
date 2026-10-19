@@ -7,15 +7,20 @@ import DeskDoodle from '../../components/DeskDoodle';
 import Icon from '../../components/Icon';
 import Spinner from '../../components/Spinner';
 import { useActiveTab } from '../../hooks/useActiveTab';
+import { usePostingSignals } from '../../hooks/usePostingSignals';
 import { useStoredValue } from '../../hooks/useStoredValue';
 import { fillTab, isFillable, scanTab } from '../../services/active-tab-bridge';
 import CoverLetterEditor from './CoverLetterEditor';
 import FillActionDock from './FillActionDock';
 import FitAnalysis from './FitAnalysis';
+import PostingFacts from './PostingFacts';
+import TailoredResume from './TailoredResume';
 import LinkedInHome from '../linkedin/LinkedInHome';
 import { isLinkedInNetworkingPage } from '../../../shared/jobs/linkedin-profile-id';
+import { profileEditSite } from '../../../shared/jobs/profile-pages';
+import ProfileBoostView from '../boost/ProfileBoostView';
 
-const WEAK_FIT_BELOW_SCORE = 55;
+const WEAK_FIT_BELOW_SCORE = 30;
 const MINIMUM_POSTING_TEXT_LENGTH = 200;
 const SUBMITTED_STATUSES = ['applied', 'interview', 'offer', 'rejected'];
 type BusyAction = '' | 'check' | 'fill' | 'force';
@@ -45,6 +50,7 @@ export default function JobView({
   }, []);
   const { currentTab, progressText, setProgressText } = useActiveTab(clearMessages);
   const jobs = useStoredValue<Job[]>(STORAGE_KEYS.JOBS, []);
+  const liveSignals = usePostingSignals(currentTab?.id, currentTab?.url);
   const job = currentTab
     ? jobs.find((savedJob) => (savedJob.key ?? jobKey(savedJob.url)) === jobKey(currentTab.url))
     : undefined;
@@ -91,6 +97,9 @@ export default function JobView({
     );
   };
 
+  // Your own profile editor (e.g. Wellfound): rewrite it for recruiter search instead of filling it.
+  const profileSite = profileEditSite(currentTab?.url);
+  if (currentTab && profileSite) return <ProfileBoostView tab={currentTab} site={profileSite} onToast={onToast} />;
   // On LinkedIn you ask for referrals; job fit and autofill stay for job postings.
   if (currentTab && isLinkedInNetworkingPage(currentTab.url)) return <LinkedInHome onToast={onToast} />;
   if (!currentTab || !isFillable(currentTab.url)) {
@@ -123,6 +132,7 @@ export default function JobView({
           </p>
         )}
       </header>
+      <PostingFacts job={job} jobs={jobs} liveSignals={liveSignals} />
       {!fit && busyAction !== 'check' && (
         <section className="sheet stack">
           <p className="section-title">Is this one for you?</p>
@@ -151,6 +161,7 @@ export default function JobView({
         </p>
       )}
       {fit && <FitAnalysis job={job!} onRecheck={() => void handleCheckFit(true)} isBusy={isBusy} />}
+      {job && fit && <TailoredResume job={job} onToast={onToast} />}
       {job && (fit || job.coverLetter) && <CoverLetterEditor job={job} onToast={onToast} />}
       {canMarkApplied && (
         <p className="small center">

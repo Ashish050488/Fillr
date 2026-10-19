@@ -1,4 +1,6 @@
 import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
+import { deepQueryAll } from '../recipes/deep-query';
+import { findSiteRecipe } from '../recipes/site-recipes';
 
 /** What a submit button and a "your application went through" page look like across ATSs. */
 const SUBMIT_TEXT = /\b(submit|send|apply|finish|complete)\b/i;
@@ -29,6 +31,9 @@ export function looksSubmitted(pageDocument: Document = document, urlBefore?: st
   const hasNavigated = pageLocation.href !== urlBefore;
   if (SUCCESS_URL.test(pageLocation.pathname + pageLocation.search) && hasNavigated) return true;
   if (isWorkdayPage(pageLocation) && hasNavigated && WORKDAY_SUCCESS_URL.test(pageLocation.pathname)) return true;
+  // A known ATS shows a specific confirmation element, which is surer than any text.
+  const recipe = findSiteRecipe(pageDocument);
+  if (recipe?.successSelectors.some((selector) => deepQueryAll(selector, pageDocument).length > 0)) return true;
   // Job descriptions often already say "thank you for your interest": only new text counts.
   return !textWasThere && hasSuccessText(pageDocument);
 }

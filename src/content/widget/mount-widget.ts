@@ -64,6 +64,10 @@ export function mountWidget(context: ContentScriptContext): void {
       .then((reply) => reply.error && !reply.success && view.showStatus(reply.error))
       .catch(() => undefined);
   });
+  elements.doneTrackerButton.addEventListener(
+    'click',
+    () => void sendMessage('OPEN_PANEL', undefined).catch(() => undefined),
+  );
   elements.appliedButton.addEventListener('click', async () => {
     elements.appliedButton.disabled = true;
     try {
@@ -86,11 +90,11 @@ export function mountWidget(context: ContentScriptContext): void {
     context.setTimeout(() => {
       isRefreshScheduled = false;
       if (!elements.host.isConnected) document.documentElement.append(elements.host);
-      if (fillController.hasNewStep() && collectFillables().length >= 2) {
+      if (fillController.hasPendingFields() && collectFillables().length >= 2) {
         // Never interrupt you: wait until you have paused clicking and typing.
         if (userActivity.millisecondsSinceLastAction() < USER_PAUSE_MILLISECONDS)
           context.setTimeout(refreshWidget, RETRY_AFTER_USER_MILLISECONDS);
-        else fillController.fillNewStep();
+        else fillController.fillPendingFields();
         return;
       }
       // Never hide the widget mid-fill or once you have opened it.
@@ -141,7 +145,9 @@ export function mountWidget(context: ContentScriptContext): void {
         if (!reply.success) return;
         elements.host.hidden = false;
         view.setOpen(true);
-        view.showStatus(`Applied${reply.jobTitle ? ` to ${reply.jobTitle}` : ''}. Saved to your tracker.`);
+        elements.doneBanner.hidden = false;
+        elements.doneLine.textContent = `${reply.jobTitle ? `${reply.jobTitle}: ` : ''}saved to your tracker. Follow up in a week.`;
+        elements.report.hidden = true;
         elements.appliedButton.hidden = true;
       })
       .catch(() => undefined);

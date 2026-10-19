@@ -227,3 +227,55 @@ textarea {
   width: 14px;
   height: 14px;
 }
+/* Posting facts: good, plain or a warning, told apart by weight and border, not colour alone. */
+.chip.signal {
+  font-size: var(--text-xs);
+  cursor: default;
+}
+.chip.signal.good {
+  border-style: solid;
+}
+.chip.signal.info {
+  border-style: dashed;
+  color: var(--ink-3);
+}
+.chip.signal.warning {
+  font-weight: 700;
+  border-width: 2px;
+}
+.notice {
+  padding: 6px 10px;
+  border-left: 3px double var(--ink);
+}
+/* Interview prep lines carry no icon: the bold question is enough. */
+.prep-points li {
+  grid-template-columns: 1fr;
+}
+/* Profile rewrite: the current text stays one quiet line, the new text is the box you edit. */
+.boost-card {
+  padding: 10px 12px;
+  border: 1.5px solid var(--rule);
+}
+.boost-current {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.boost-draft {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px dashed var(--rule);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.boost-draft:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.over-limit {
+  font-weight: 700;
+  text-decoration: underline wavy;
+}

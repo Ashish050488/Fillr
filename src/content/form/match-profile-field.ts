@@ -1,3 +1,5 @@
+import { readAccessibleFieldSignals, readFieldMetadata } from './accessible-field-signals';
+
 export type ProfileValues = Record<string, string>;
 export interface Match {
   key: string;
@@ -18,7 +20,16 @@ const aliases: Record<string, string[]> = {
   github: ['github', 'git hub'],
   portfolio: ['portfolio', 'personal website', 'website'],
   currentcompany: ['current company', 'current employer'],
-  yearsexperience: ['years experience', 'years of experience', 'total experience'],
+  yearsexperience: [
+    'years experience',
+    'years of experience',
+    'total experience',
+    'years of professional experience',
+    'years of work experience',
+    'experience in years',
+    'in years what is your experience',
+    'how many years of experience',
+  ],
   currentctc: ['current ctc', 'current salary', 'current compensation'],
   expectedctc: ['expected ctc', 'expected salary', 'desired salary'],
   noticeperiod: ['notice period'],
@@ -63,6 +74,8 @@ const aliases: Record<string, string[]> = {
     'date of joining',
     'joining date',
     'when can you start',
+    'preferred start date',
+    'start date preference',
   ],
   heardabout: [
     'how did you hear',
@@ -99,11 +112,6 @@ export function normalise(value: string): string {
 
 export function fieldSignals(element: Element): string[] {
   const input = element as HTMLInputElement;
-  const labels = Array.from(input.labels ?? []).map((label) => label.textContent ?? '');
-  const root = element.getRootNode?.() as Document | ShadowRoot | undefined;
-  const labelledBy = (element.getAttribute('aria-labelledby') ?? '')
-    .split(/\s+/)
-    .map((id) => root?.getElementById?.(id)?.textContent ?? '');
   // Workday and other React ATSs name fields in data attributes, e.g. data-automation-id=
   // "legalNameSection_firstName" or a wrapper "formField-addressSection_city".
   const automation = [
@@ -116,12 +124,11 @@ export function fieldSignals(element: Element): string[] {
       ?.replace(/^formField-?/, ''),
   ].map((value) => (value ?? '').replace(/--/g, ' ').replace(/Section/g, ' '));
   return [
-    ...labels,
-    ...labelledBy,
-    element.getAttribute('aria-label') ?? '',
+    ...readAccessibleFieldSignals(element),
     input.placeholder ?? '',
     input.name ?? '',
     input.id ?? '',
+    ...readFieldMetadata(element),
     ...automation,
   ]
     .map(normalise)
@@ -176,4 +183,17 @@ export function bestMatch(element: Element, profile: ProfileValues): Match | und
   candidates.sort((left, right) => right.score - left.score);
   if (candidates[1] && candidates[0].score - candidates[1].score < 3) return undefined;
   return candidates[0];
+}
+
+/** The profile value a question's text asks for ("How did you hear?" → heardAbout); longest phrase wins. */
+export function matchLabelToProfile(label: string, profile: ProfileValues): Match | undefined {
+  const text = ` ${normalise(label)} `;
+  let best: Match | undefined;
+  for (const [key, value] of Object.entries(profile)) {
+    if (!value.trim()) continue;
+    for (const term of aliases[normalise(key).replace(/ /g, '')] ?? []) {
+      if (text.includes(` ${term} `) && (!best || term.length > best.score)) best = { key, value, score: term.length };
+    }
+  }
+  return best;
 }

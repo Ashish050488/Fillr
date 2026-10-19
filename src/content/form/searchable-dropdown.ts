@@ -2,10 +2,12 @@ import { matchOption } from '../values/adapt-field-value';
 import { nativeSet } from './set-field-value';
 
 /** React-select, Greenhouse's new boards, Lever location and similar searchable dropdowns. */
-export function isCombobox(element: Element): element is HTMLInputElement {
+export type Combobox = HTMLInputElement | HTMLElement;
+
+export function isCombobox(element: Element): boolean {
+  if (element.getAttribute('role') === 'combobox') return element instanceof HTMLElement;
   if (!(element instanceof HTMLInputElement) || !['text', 'search', ''].includes(element.type)) return false;
   return (
-    element.getAttribute('role') === 'combobox' ||
     element.getAttribute('aria-autocomplete') === 'list' ||
     element.getAttribute('aria-haspopup') === 'listbox' ||
     Boolean(element.closest('[class*="select__control"], [class*="Select-control"]')) ||
@@ -17,7 +19,7 @@ export function isCombobox(element: Element): element is HTMLInputElement {
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function visibleOptions(ownerDocument: Document, input: HTMLInputElement): HTMLElement[] {
+function visibleOptions(ownerDocument: Document, input: Combobox): HTMLElement[] {
   const owned = input.getAttribute('aria-controls') || input.getAttribute('aria-owns');
   const scope: ParentNode = (owned && ownerDocument.getElementById(owned)) || ownerDocument;
   return Array.from(
@@ -44,7 +46,7 @@ function clickLikeAPerson(element: HTMLElement): void {
  * Workday shows a choice as "1 item selected, India (+91)" while its search box stays empty;
  * React-select shows a single-value chip. Either way the field is already answered.
  */
-export function hasSelection(input: HTMLInputElement): boolean {
+export function hasSelection(input: Combobox): boolean {
   const container =
     input.closest('[data-automation-id^="multiselectInputContainer"]')?.parentElement ??
     input.closest('[data-automation-id^="formField"]') ??
@@ -59,9 +61,36 @@ export function hasSelection(input: HTMLInputElement): boolean {
   return /\b[1-9]\d*\s+items?\s+selected\b/i.test(container.textContent ?? '');
 }
 
-export async function fillCombobox(input: HTMLInputElement, value: string): Promise<boolean> {
-  if (input.value.trim() || input.disabled || input.readOnly || hasSelection(input)) return false;
-  return searchAndPick(input, value);
+export async function fillCombobox(input: Combobox, value: string): Promise<boolean> {
+  if (input instanceof HTMLInputElement) {
+    if (input.value.trim() || input.disabled || input.readOnly || hasSelection(input)) return false;
+    return searchAndPick(input, value);
+  }
+  if (input.getAttribute('aria-disabled') === 'true' || hasSelection(input)) return false;
+  return clickAndPickComboboxOption(input, value);
+}
+
+/** Open a non-input ARIA combobox and choose its visible listbox option. */
+async function clickAndPickComboboxOption(combobox: HTMLElement, value: string): Promise<boolean> {
+  const ownerDocument = combobox.ownerDocument;
+  if (
+    combobox.textContent?.trim() &&
+    !/^(select|choose|please select|none selected)$/i.test(combobox.textContent.trim())
+  )
+    return false;
+  clickLikeAPerson(combobox);
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    await wait(100);
+    const options = visibleOptions(ownerDocument, combobox);
+    const texts = options.map((option) => option.textContent?.replace(/\s+/g, ' ').trim() ?? '');
+    const chosen = matchOption(texts, value);
+    if (!chosen) continue;
+    clickLikeAPerson(options[texts.indexOf(chosen)]);
+    await wait(80);
+    return true;
+  }
+  press(ownerDocument.activeElement ?? combobox, 'Escape');
+  return false;
 }
 
 /**

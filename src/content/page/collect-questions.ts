@@ -10,6 +10,7 @@ export { readJobContext } from './read-job-context';
 const MAXIMUM_QUESTIONS = 40;
 const LONG_ANSWER_HINT =
   /\b(cover letter|why|tell us|describe|about (yourself|you)|motivation|interest|additional information|anything else|summary|experience with|explain)\b/i;
+const COMBOBOX_PLACEHOLDER = /^(select( one)?|choose|please select|none selected)$/i;
 
 export interface PendingQuestion {
   question: FormQuestion;
@@ -20,7 +21,11 @@ export interface PendingQuestion {
 
 function isUnanswered(element: Fillable): boolean {
   if (element instanceof HTMLSelectElement) return !element.value || element.selectedIndex <= 0;
-  if (element instanceof HTMLInputElement && isCombobox(element) && hasSelection(element)) return false;
+  if (isCombobox(element)) {
+    if (hasSelection(element)) return false;
+    if (element instanceof HTMLInputElement) return !element.value.trim();
+    return !element.textContent?.trim() || COMBOBOX_PLACEHOLDER.test(element.textContent.trim());
+  }
   if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return !element.value.trim();
   return !element.textContent?.trim();
 }

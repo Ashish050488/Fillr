@@ -16,6 +16,8 @@ export async function loadFillProfile() {
   // Workday asks what kind of phone it is, and "How did you hear about us?" is required there.
   if (!values.phoneDeviceType) values.phoneDeviceType = 'Mobile';
   if (!values.heardAbout) values.heardAbout = 'LinkedIn';
+  // "Preferred start date": after your notice period, or a month from now.
+  if (!values.earliestStart) values.earliestStart = values.noticePeriod || '30 days';
   if (!values.name && (values.firstName || values.lastName)) {
     values.name = [values.firstName, values.lastName].filter(Boolean).join(' ');
   }

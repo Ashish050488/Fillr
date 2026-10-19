@@ -34,6 +34,10 @@ const pageScanSchema = z
     company: titleText,
     questions: z.array(questionSchema).max(40),
     atsUrl: z.string().max(2000).optional(),
+    signals: z
+      .array(z.object({ label: z.string().max(120), tone: z.enum(['good', 'info', 'warning']) }).strict())
+      .max(10)
+      .optional(),
   })
   .strict();
 export const jobPrepareSchema = z
