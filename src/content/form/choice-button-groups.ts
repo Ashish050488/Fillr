@@ -1,4 +1,5 @@
-import { normalizeWhitespace } from '../page/question-label';
+import { normalizeWhitespace, stripMachineIds } from '../page/question-label';
+import { findApplicationScope } from '../page/posting-url';
 
 /**
  * Ashby, Rippling, Gem and many custom forms ask Yes/No (or "How did you hear?") as a row of
@@ -58,14 +59,18 @@ function readGroupLabel(row: HTMLElement): string {
     const labelElement = Array.from(field.querySelectorAll(LABEL_SELECTOR)).find(
       (candidate) => !row.contains(candidate) && normalizeWhitespace(candidate.textContent).length > 1,
     );
-    if (labelElement) return normalizeWhitespace(labelElement.textContent).slice(0, 400);
+    if (labelElement) return stripMachineIds(labelElement.textContent ?? '').slice(0, 400);
     if (field.matches(FIELD_CONTAINER)) break;
   }
   return '';
 }
 
 /** Button rows that ask a question; groups already answered are included, check isChoiceSelected. */
-export function findChoiceButtonGroups(root: ParentNode = document): ChoiceButtonGroup[] {
+/** A button's words as shown, without image ids that leak into its text. */
+export const readChoiceText = (button: Element) => stripMachineIds(button.textContent ?? '');
+
+export function findChoiceButtonGroups(root: ParentNode | undefined = findApplicationScope()): ChoiceButtonGroup[] {
+  if (!root) return [];
   const seenRows = new Set<Element>();
   const groups: ChoiceButtonGroup[] = [];
   for (const candidate of Array.from(root.querySelectorAll<HTMLElement>(CHOICE_CANDIDATES))) {
@@ -77,7 +82,7 @@ export function findChoiceButtonGroups(root: ParentNode = document): ChoiceButto
     const buttons = items
       .map((item) => (item.matches(CHOICE_CANDIDATES) ? item : item.querySelector<HTMLElement>(CHOICE_CANDIDATES)))
       .filter((button): button is HTMLElement => Boolean(button));
-    const texts = buttons.map((button) => normalizeWhitespace(button.textContent));
+    const texts = buttons.map(readChoiceText);
     const hasVisibleTextBox = Array.from(row.querySelectorAll('input, select, textarea')).some(
       (control) => isVisible(control) && !['radio', 'checkbox'].includes((control as HTMLInputElement).type),
     );

@@ -6,8 +6,19 @@ export const SENSITIVE =
 
 export const normalizeWhitespace = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim();
 
+// "6c25a598-02f2-4035-a8e1-c0db110c90ad@2.00x" (an image's file id) or a long hash inside visible text.
+const MACHINE_ID_TOKEN =
+  /\b[0-9a-f]{8}(?:[\s_-][0-9a-f]{4}){3}[\s_-][0-9a-f]{12}\b(?:@\d+(?:\.\d+)?x)?|@\d+(?:\.\d+)?x|\b(?=[0-9a-f]*\d)[0-9a-f]{16,}\b/gi;
+
+/** Text as a person reads it: ids and image file names that leak into page text are dropped. */
+export const stripMachineIds = (text: string) => normalizeWhitespace(text.replace(MACHINE_ID_TOKEN, ' '));
+
 /** Human-readable question text for a control, as an applicant would read it. */
 export function questionLabel(element: Element): string {
+  return stripMachineIds(readQuestionLabel(element));
+}
+
+function readQuestionLabel(element: Element): string {
   const input = element as HTMLInputElement;
   if (input.type === 'radio') {
     const group = element.closest('fieldset, [role="radiogroup"], [role="group"]');

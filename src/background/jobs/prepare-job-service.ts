@@ -55,7 +55,15 @@ export function prepareJob(options: PrepareOptions): Promise<PreparedJob> {
   return preparation;
 }
 
-async function prepareJobOnce({ scan, force, refresh, analyzeOnly, onStage }: PrepareOptions): Promise<PreparedJob> {
+/** A saved record for another company (a list page that once shared one address) must never be reused. */
+export function isOtherCompany(savedCompany: string | undefined, pageCompany: string | undefined): boolean {
+  const simplify = (name?: string) => (name ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const [saved, shown] = [simplify(savedCompany), simplify(pageCompany)];
+  return Boolean(saved && shown) && !saved.includes(shown) && !shown.includes(saved);
+}
+
+async function prepareJobOnce(options: PrepareOptions): Promise<PreparedJob> {
+  const { scan, force, analyzeOnly, onStage } = options;
   // No profile, no work: fail in milliseconds, before any record, scrape or AI call.
   const isFounderNote = isFounderNoteSite(scan.url);
   const writerInput = {
@@ -63,6 +71,7 @@ async function prepareJobOnce({ scan, force, refresh, analyzeOnly, onStage }: Pr
     ...(isFounderNote ? { audience: 'yc-founder' as const } : {}),
   };
   let job = await ensureJobMeta(scan.url, scan);
+  const refresh = options.refresh || (isFounderNote && isOtherCompany(job.company, scan.company));
   if (scan.signals?.length)
     job = await updateJob(scan.url, (current) => ({ ...current, postingSignals: scan.signals }));
   if (!job.jobFacts || refresh) onStage?.('Reading the job description…');

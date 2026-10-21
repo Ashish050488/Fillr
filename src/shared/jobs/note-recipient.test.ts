@@ -31,6 +31,7 @@ describe('findCompanyName', () => {
   it('reads the company from the apply popup', () => {
     expect(findCompanyName('hiring manager\nReach out to Vedant at Salus\nStart a conversation')).toBe('Salus');
     expect(findCompanyName('Start a conversation with the team at Zudo. Share something')).toBe('Zudo');
+    expect(findCompanyName('Recent Jobs\nApply to Taskwiser\nIs your profile up to date?')).toBe('Taskwiser');
     expect(findCompanyName('Apply now')).toBeUndefined();
   });
 });

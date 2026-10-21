@@ -37,7 +37,9 @@ const COMPANY_PATTERN =
 
 /** The company an apply popup names, when the page address does not identify the job. */
 export function findCompanyName(popupText: string): string | undefined {
-  return popupText.match(COMPANY_PATTERN)?.[1]?.trim() || undefined;
+  // Wellfound's job panel heads its form "Apply to Taskwiser".
+  const applyHeading = popupText.match(/^\s*Apply to ([A-Z0-9][^\n]{0,40}?)\s*$/m)?.[1];
+  return popupText.match(COMPANY_PATTERN)?.[1]?.trim() || applyHeading?.trim() || undefined;
 }
 
 const OPENING_GREETING = /^\s*(?:hi|hey|hello|dear)\b[^,\n]{0,60},?[ \t]*\n?/i;

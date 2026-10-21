@@ -6,6 +6,7 @@ import {
   setAnswer,
   type QuestionToAsk,
 } from '../answers/remembered-answers';
+import { stripMachineIds } from '../page/question-label';
 
 const PLACEHOLDER_OPTION = /^(select one|select|choose|choose one|-+)$/i;
 const MAXIMUM_QUESTIONS_SHOWN = 12;
@@ -22,7 +23,10 @@ function createElement<Tag extends keyof HTMLElementTagNameMap>(
 }
 
 /** "Do you possess a valid work permit…?*" reads better without the asterisk and boilerplate. */
-const tidyLabel = (questionLabel: string) => questionLabel.replace(/\*\s*$/, '').trim();
+const tidyLabel = (questionLabel: string) =>
+  stripMachineIds(questionLabel)
+    .replace(/\*\s*$/, '')
+    .trim();
 
 function buildQuestionRow(questionToAsk: QuestionToAsk, onAnswered: (row: HTMLElement) => void): HTMLElement {
   const row = createElement('div', 'ask-row');
@@ -43,11 +47,13 @@ function buildQuestionRow(questionToAsk: QuestionToAsk, onAnswered: (row: HTMLEl
     onAnswered(row);
   };
 
-  const options = (questionToAsk.question.options ?? []).filter((option) => !PLACEHOLDER_OPTION.test(option.trim()));
+  const options = (questionToAsk.question.options ?? []).filter(
+    (option) => stripMachineIds(option) && !PLACEHOLDER_OPTION.test(option.trim()),
+  );
   if (questionToAsk.question.kind === 'choice' && options.length) {
     const optionRow = createElement('div', 'ask-options');
     for (const option of options) {
-      const optionButton = createElement('button', 'ask-option r2', option);
+      const optionButton = createElement('button', 'ask-option r2', stripMachineIds(option));
       optionButton.type = 'button';
       optionButton.addEventListener('click', () => void handleAnswer(option, optionButton));
       optionRow.append(optionButton);

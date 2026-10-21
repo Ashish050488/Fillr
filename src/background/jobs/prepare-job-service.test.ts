@@ -173,3 +173,12 @@ describe('safety', () => {
     expect(calls('job_match')).toBe(1);
   });
 });
+
+describe('isOtherCompany', () => {
+  it('spots a saved record that belongs to another company', async () => {
+    const { isOtherCompany } = await import('./prepare-job-service');
+    expect(isOtherCompany('Babaclick', 'Taskwiser')).toBe(true);
+    expect(isOtherCompany('Taskwiser Inc.', 'taskwiser')).toBe(false);
+    expect(isOtherCompany(undefined, 'Taskwiser')).toBe(false);
+  });
+});

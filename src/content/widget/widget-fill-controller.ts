@@ -10,6 +10,9 @@ import type { WidgetView } from './widget-view';
 import { attemptedFields } from '../fill/fill-session';
 import { hasValue, readLastFillReport } from '../fill/fill-report';
 import { finishFillProgress, renderFillReport, showFillStage } from './widget-report';
+import { isFounderNoteSite } from '../../shared/jobs/founder-note-sites';
+import { jobKey } from '../../shared/jobs/job-key';
+import { readPostingUrl } from '../page/posting-url';
 
 const FILL_STEP_LABEL = 'Fill this step';
 const QUICK_FILL_LABEL = 'Fill now';
@@ -30,6 +33,7 @@ export function createFillController(elements: WidgetElements, view: WidgetView)
   let shouldContinueSteps = false;
   let shouldForceSteps = false;
   let lastFilledStep = '';
+  let lastFilledJob = '';
   if (isMultiStep) {
     elements.fillButton.textContent = FILL_STEP_LABEL;
     elements.fillButton.dataset.label = FILL_STEP_LABEL;
@@ -61,6 +65,7 @@ export function createFillController(elements: WidgetElements, view: WidgetView)
         shouldContinueSteps = true;
         shouldForceSteps = isForced;
         lastFilledStep = readCurrentStep();
+        lastFilledJob = jobKey(readPostingUrl());
         if (isMultiStep) elements.stepNote.hidden = false;
       }
       if (!fillResult.success) shouldContinueSteps = false;
@@ -110,6 +115,11 @@ export function createFillController(elements: WidgetElements, view: WidgetView)
   const hasPendingFields = () => {
     if (!shouldContinueSteps || runningFill) return false;
     if (Date.now() - lastAutoFillAt < AUTO_FILL_COOLDOWN_MILLISECONDS) return false;
+    // Wellfound and YC lists: opening the next job is not the next step. You press Fill for it.
+    if (isFounderNoteSite(location.href) && jobKey(readPostingUrl()) !== lastFilledJob) {
+      shouldContinueSteps = false;
+      return false;
+    }
     if (readCurrentStep() !== lastFilledStep) {
       emptyAutoFillCount = 0;
       return true;

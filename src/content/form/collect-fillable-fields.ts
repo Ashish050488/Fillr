@@ -1,8 +1,11 @@
+import { findApplicationScope } from '../page/posting-url';
+
 export type Fillable = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLElement;
 export function collectFillables(
-  root: Document | ShadowRoot | Element = document,
+  root: Document | ShadowRoot | Element | undefined = findApplicationScope() as Document | Element | undefined,
   seen = new Set<Element>(),
 ): Fillable[] {
+  if (!root) return [];
   const fillableFields: Fillable[] = [];
   // Workday and similar ATSs render dropdowns as buttons that open a listbox.
   const controls = root.querySelectorAll<Fillable>(

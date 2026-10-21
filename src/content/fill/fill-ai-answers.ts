@@ -2,7 +2,7 @@ import { sendMessage, sendMessageWithin } from '../../shared/messaging/extension
 import { greetByName } from '../../shared/jobs/note-recipient';
 import type { FormQuestion, PageScan } from '../../shared/types';
 import type { Fillable } from '../form/collect-fillable-fields';
-import { findChoiceButtonGroups, isChoiceSelected } from '../form/choice-button-groups';
+import { findChoiceButtonGroups, isChoiceSelected, readChoiceText } from '../form/choice-button-groups';
 import { isListboxButton, readListboxOptions } from '../form/searchable-dropdown';
 import { collectQuestions, questionLabel, SENSITIVE, type PendingQuestion } from '../page/collect-questions';
 import { readJobCountry } from '../answers/job-country';
@@ -54,7 +54,7 @@ function collectChoiceButtonQuestions(): PendingQuestion[] {
         id: `bg${groupIndex}`,
         label: group.label,
         kind: 'choice' as const,
-        options: group.buttons.map((button) => (button.textContent ?? '').trim()),
+        options: group.buttons.map(readChoiceText),
       },
       elements: group.buttons,
     }));
